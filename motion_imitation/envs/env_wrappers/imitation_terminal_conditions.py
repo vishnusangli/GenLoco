@@ -26,13 +26,20 @@ from utilities import motion_util
 from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.9
-TIME_DELAY=0.5
+TIME_DELAY=1
 
+"""
+Bgeinning Training:
+Target Velocity: 0.6
+Tolerance:
 
+Walking Training
+
+"""
 def imitation_terminal_condition(env,
                                  mode,
-                                 dist_fail_threshold=1.0,
-                                 rot_fail_threshold=0.5 * np.pi):
+                                 dist_fail_threshold=0.3,
+                                 rot_fail_threshold= np.pi*1/3):
   """A terminal condition for motion imitation task.
 
   Args:
@@ -72,14 +79,20 @@ def imitation_terminal_condition(env,
   root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
       env.robot.quadruped)
 
+  #Position Error Termination
+  # X-direction (array index 0) is the desired moving direction
+  # Check whether x distance is greater or within dist_fail_threshold of TARGET_VELOCITY-covered distance
+  # in similar time.
+
+  # Then check squared distance in other directions and check whether they are under dist_fail_threshold
   root_pos_diff = np.array(root_pos_ref) - np.array(root_pos_sim)
-  root_pos_fail = (
-      root_pos_diff.dot(root_pos_diff) >
-      dist_fail_threshold * dist_fail_threshold)
+  xdir_pos_fail = root_pos_diff[0] > -dist_fail_threshold
+  other_pos_fail = (root_pos_diff[1]*root_pos_diff[1])+(root_pos_diff[2]*root_pos_diff[2]) > dist_fail_threshold*dist_fail_threshold
+  root_pos_fail = xdir_pos_fail or other_pos_fail
   if (env_time<=TIME_DELAY): root_pos_fail=False
   
   roll_pitch_yaw = np.array(env.robot.GetTrueBaseRollPitchYaw())
-  root_rot_fail = np.any(np.cos(roll_pitch_yaw) < 0.5)
+  root_rot_fail = np.any(roll_pitch_yaw > rot_fail_threshold)
 
   # root_rot_diff = transformations.quaternion_multiply(
   #     np.array(root_rot_ref),
@@ -94,8 +107,8 @@ def imitation_terminal_condition(env,
       or root_pos_fail \
       or root_rot_fail \
       or contact_fall
-  if done:
-    print("Fail:", motion_over, root_pos_fail, root_rot_fail, contact_fall, task._get_motion_time())
-  if mode =="test":
-    done=contact_fall or motion_over
+  # if done:
+  #   print("Fail:", motion_over, root_pos_fail, root_rot_fail, contact_fall, task._get_motion_time(), root_pos_diff)
+  # if mode =="test":
+  #   done=contact_fall or motion_over
   return done

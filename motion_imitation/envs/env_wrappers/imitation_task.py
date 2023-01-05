@@ -36,8 +36,8 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.9
-ENERGY_EXP_SCALE = 1e-2
-VEL_EN_POS = [0.5, 0.4, 0.1]
+ENERGY_EXP_SCALE = 5e-2
+VEL_EN_POS = [0.4, 0.5, 0.1]
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
     scaled_x = x *scale
@@ -383,7 +383,7 @@ class ImitationTask(object):
 
 
     reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2])
-    print(energy_penalty, reward)
+    #print(energy_penalty, reward)
 
     return reward * self._weight
   
@@ -403,7 +403,7 @@ class ImitationTask(object):
 
     x = tar_dir_speed
     rewards = my_tolerance(x, tar_speed, 2*tar_speed, 0.5*tar_speed, 0)
-    print("Reward: ", tar_dir_speed, rewards, end=", ")
+    #print("Reward: ", tar_dir_speed, rewards, end=", ")
     return rewards
 
   def custom_energy_penalty(self, scale_var):
