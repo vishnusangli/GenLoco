@@ -82,7 +82,7 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   visualize = (not enable_randomized_robot) and enable_rendering
   assert len(motion_files) > 0
 
-  curriculum_episode_length_start = 20
+  curriculum_episode_length_start =300
   curriculum_episode_length_end = 300
   
   sim_params = locomotion_gym_config.SimulationParameters()
@@ -109,7 +109,7 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   if mode == "test":
     ref_state_init_prob=0.0  
   else:
-    ref_state_init_prob=0.9  # training
+    ref_state_init_prob=0.0  # training
 
   if enable_randomized_robot:
     task = randomized_imitation_task.RandomizedImitationTask(ref_motion_filenames=motion_files,

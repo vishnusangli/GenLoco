@@ -25,6 +25,8 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
+TARGET_VELOCITY = 0.6
+
 
 def imitation_terminal_condition(env,
                                  mode,
@@ -63,6 +65,9 @@ def imitation_terminal_condition(env,
         break
 
   root_pos_ref, root_rot_ref = tuple(task.get_ref_base_position()), tuple(task.get_ref_base_rotation())
+  env_time = task._get_motion_time()
+  root_pos_ref = np.array([TARGET_VELOCITY * env_time, 0, 0])
+
   root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
       env.robot.quadruped)
 
@@ -70,20 +75,25 @@ def imitation_terminal_condition(env,
   root_pos_fail = (
       root_pos_diff.dot(root_pos_diff) >
       dist_fail_threshold * dist_fail_threshold)
+  
+  roll_pitch_yaw = np.array(env.robot.GetTrueBaseRollPitchYaw())
+  root_rot_fail = np.any(np.cos(roll_pitch_yaw) < 0.5)
 
-  root_rot_diff = transformations.quaternion_multiply(
-      np.array(root_rot_ref),
-      transformations.quaternion_conjugate(np.array(root_rot_sim)))
-  _, root_rot_diff_angle = pose3d.QuaternionToAxisAngle(
-      root_rot_diff)
-  root_rot_diff_angle = motion_util.normalize_rotation_angle(
-      root_rot_diff_angle)
-  root_rot_fail = (np.abs(root_rot_diff_angle) > rot_fail_threshold)
+  # root_rot_diff = transformations.quaternion_multiply(
+  #     np.array(root_rot_ref),
+  #     transformations.quaternion_conjugate(np.array(root_rot_sim)))
+  # _, root_rot_diff_angle = pose3d.QuaternionToAxisAngle(
+  #     root_rot_diff)
+  # root_rot_diff_angle = motion_util.normalize_rotation_angle(
+  #     root_rot_diff_angle)
+  # root_rot_fail = (np.abs(root_rot_diff_angle) > rot_fail_threshold)
 
   done = motion_over \
       or root_pos_fail \
       or root_rot_fail \
       or contact_fall
+  if done:
+    print("Fail:", motion_over, root_pos_fail, root_rot_fail, contact_fall)
   if mode =="test":
     done=contact_fall or motion_over
   return done

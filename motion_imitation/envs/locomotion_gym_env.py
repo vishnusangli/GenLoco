@@ -508,3 +508,6 @@ class LocomotionGymEnv(gym.Env):
   @property
   def robot_class(self):
     return self._robot_class
+    
+  def set_curriculum_scale(self, scale):
+    self._curriculum_scale = scale

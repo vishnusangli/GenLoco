@@ -35,6 +35,23 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
+TARGET_VELOCITY = 0.6
+ENERGY_EXP_SCALE = 5e-2
+VEL_EN_POS = [0.6, 0.3, 0.1]
+def linear_sigmoid(x, val_at_1):
+    scale = 1 - val_at_1
+    scaled_x = x *scale
+    return np.where(np.abs(scaled_x) < 1, 1 - scaled_x, 0.)
+
+def my_tolerance(x, lower_bound, upper_bound, margin, value_at_margin):
+    #no checking done for values, double check the inputs
+    in_bounds = np.logical_and(lower_bound <= x, x <= upper_bound)
+    if np.nonzero(margin):
+        d = np.where(x < lower_bound, lower_bound - x, x - upper_bound) / margin
+        value = np.where(in_bounds, 1., linear_sigmoid(d, value_at_margin))
+    else:
+        value = np.where(in_bounds, 1., 0.)
+    return value
 
 class ImitationTask(object):
   """Imitation reference motion task."""
@@ -274,6 +291,7 @@ class ImitationTask(object):
     Returns:
       An array containing the target frames.
     """
+    return np.array([TARGET_VELOCITY])
     time0 = self._get_motion_time()
     dt = self._env.env_time_step
     motion = self.get_active_motion()
@@ -359,18 +377,61 @@ class ImitationTask(object):
   def reward(self, env):
     """Get the reward without side effects."""
     del env
+    loco_reward = self.custom_reward_loco(TARGET_VELOCITY)
+    energy_penalty = self.custom_energy_penalty(ENERGY_EXP_SCALE)
+    pose_reward = self.custom_pose_reward()
 
-    pose_reward = self._calc_reward_pose()
-    velocity_reward = self._calc_reward_velocity()
-    root_pose_reward = self._calc_reward_root_pose()
-    root_velocity_reward = self._calc_reward_root_velocity()
 
-    reward = self._pose_weight * pose_reward \
-             + self._velocity_weight * velocity_reward \
-             + self._root_pose_weight * root_pose_reward \
-             + self._root_velocity_weight * root_velocity_reward
+    reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2])
+    print(energy_penalty, reward)
 
     return reward * self._weight
+  
+  def custom_reward_loco(self, tar_speed):
+    """Return the locomotion reward as according to the walk-in-the park
+    
+    This function is normalized at [0, 1]
+    """
+    env = self._env
+    robot = env.robot
+    sim_model = robot.quadruped
+    pyb = self._get_pybullet_client()
+
+    root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
+    root_vel_sim = np.array(root_vel_sim)
+    tar_dir_speed = root_vel_sim[0]
+
+    x = tar_dir_speed
+    rewards = my_tolerance(x, tar_speed, 2*tar_speed, 0.5*tar_speed, 0)
+    print("Reward: ", tar_dir_speed, rewards, end=", ")
+    return rewards
+
+  def custom_energy_penalty(self, scale_var):
+    """Returns the energy penalty in terms of motor angular velocities and torques
+    
+    Need to check the normalization of this func
+    """
+    env = self._env
+    robot = env.robot
+    sim_model = robot.quadruped
+    pyb = self._get_pybullet_client()
+    energy_consumption = - np.sum(np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()))
+    assert np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()).shape == robot.GetMotorTorques().shape
+    return np.exp(scale_var * energy_consumption)
+
+  def custom_pose_reward(self):
+    """Rewards an upright cheetah. Ignored roll since it is needed for movement?
+    
+    """
+    env = self._env
+    robot = env.robot
+    sim_model = robot.quadruped
+    roll_pitch_yaw = robot.GetTrueBaseRollPitchYaw()
+    roll = roll_pitch_yaw[0]
+    pitch = roll_pitch_yaw[1]
+    yaw = roll_pitch_yaw[2]
+
+    return np.cos(pitch) * np.cos(yaw)
 
   def _calc_reward_pose(self):
     """Get the pose reward."""
