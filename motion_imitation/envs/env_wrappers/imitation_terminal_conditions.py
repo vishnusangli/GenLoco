@@ -25,7 +25,8 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.6
+TARGET_VELOCITY = 0.9
+TIME_DELAY=0.5
 
 
 def imitation_terminal_condition(env,
@@ -66,7 +67,7 @@ def imitation_terminal_condition(env,
 
   root_pos_ref, root_rot_ref = tuple(task.get_ref_base_position()), tuple(task.get_ref_base_rotation())
   env_time = task._get_motion_time()
-  root_pos_ref = np.array([TARGET_VELOCITY * env_time, 0, 0])
+  root_pos_ref = np.array([TARGET_VELOCITY * (env_time-TIME_DELAY), 0, 0])
 
   root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
       env.robot.quadruped)
@@ -75,6 +76,7 @@ def imitation_terminal_condition(env,
   root_pos_fail = (
       root_pos_diff.dot(root_pos_diff) >
       dist_fail_threshold * dist_fail_threshold)
+  if (env_time<=TIME_DELAY): root_pos_fail=False
   
   roll_pitch_yaw = np.array(env.robot.GetTrueBaseRollPitchYaw())
   root_rot_fail = np.any(np.cos(roll_pitch_yaw) < 0.5)
@@ -93,7 +95,7 @@ def imitation_terminal_condition(env,
       or root_rot_fail \
       or contact_fall
   if done:
-    print("Fail:", motion_over, root_pos_fail, root_rot_fail, contact_fall)
+    print("Fail:", motion_over, root_pos_fail, root_rot_fail, contact_fall, task._get_motion_time())
   if mode =="test":
     done=contact_fall or motion_over
   return done
