@@ -36,7 +36,7 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.9
-ENERGY_EXP_SCALE = 5e-2
+ENERGY_EXP_SCALE = 1e-2
 VEL_EN_POS = [0.5, 0.4, 0.1]
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -431,7 +431,7 @@ class ImitationTask(object):
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
 
-    return np.cos(pitch) * np.cos(yaw) * np.cos(pitch) * np.cos(yaw)
+    return np.cos(pitch) * np.cos(yaw) * np.cos(pitch) * np.cos(yaw) * np.cos(roll)
 
   def _calc_reward_pose(self):
     """Get the pose reward."""
