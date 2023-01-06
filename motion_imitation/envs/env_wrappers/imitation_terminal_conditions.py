@@ -25,7 +25,7 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.8
+TARGET_VELOCITY = 0.6
 TIME_DELAY=1
 
 """
@@ -39,7 +39,7 @@ Walking Training
 def imitation_terminal_condition(env,
                                  mode,
                                  dist_fail_threshold=0.3,
-                                 rot_fail_threshold= np.pi*1/3):
+                                 rot_fail_threshold= np.pi*1/6):
   """A terminal condition for motion imitation task.
 
   Args:
