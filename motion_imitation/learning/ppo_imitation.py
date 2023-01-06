@@ -294,6 +294,8 @@ class PPOImitation(pposgd_simple.PPO1):
                                                     seg["true_rewards"].reshape((self.n_envs, -1)),
                                                     seg["dones"].reshape((self.n_envs, -1)),
                                                     writer, self.num_timesteps)
+                        total_episode_length_logger(np.array(seg["ep_lens"]),
+                                                    writer, episodes_so_far)
 
                     # predicted value function before udpate
                     vpredbefore = seg["vpred"]
@@ -396,3 +398,21 @@ class PPOImitation(pposgd_simple.PPO1):
             self.save(save_path)
 
         return self
+
+
+def total_episode_length_logger(lengths, writer, steps, logname="episode_length"):
+    """
+    calculates the cumulated episode reward, and prints to tensorflow log the output
+
+    :param len_acc: (np.array float) the total running length
+    :param lengths: (np.array float) the lengths
+    :param masks: (np.array bool) the end of episodes
+    :param writer: (TensorFlow Session.writer) the writer to log to
+    :param steps: (int) the current timestep
+    :return: (np.array float) the updated total running length
+    :return: (np.array float) the updated total running length
+    """
+
+    for env_idx in range(len(lengths)):
+        summary=tf.Summary(value=[tf.Summary.Value(tag=logname, simple_value=lengths[env_idx])])
+        writer.add_summary(summary, steps+env_idx)

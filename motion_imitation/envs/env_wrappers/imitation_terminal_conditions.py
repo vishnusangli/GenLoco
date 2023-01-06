@@ -106,9 +106,8 @@ def imitation_terminal_condition(env,
   done = root_pos_fail \
       or root_rot_fail \
       or contact_fall
-  if done:
-    #print("Fail:", motion_over, root_pos_fail, root_rot_fail, contact_fall, task._get_motion_time(), root_pos_diff)
-    print(f"Fail:({xdir_pos_fail:1.0f}{other_pos_fail:1.0f}) {contact_fall:1.0f} | {task._get_motion_time():8.2f} | {np.array2string(root_pos_diff, precision=1)}")
+  # if done:
+  #   print(f"Fail:({xdir_pos_fail:1.0f}{other_pos_fail:1.0f}) {contact_fall:1.0f} | {task._get_motion_time():8.2f} | {np.array2string(root_pos_diff, precision=1)}")
   # if mode =="test":
   #   done=contact_fall or motion_over
   return done
