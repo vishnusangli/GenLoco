@@ -25,7 +25,7 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.6
+TARGET_VELOCITY = 0.8
 TIME_DELAY=1
 
 """
@@ -39,7 +39,7 @@ Walking Training
 def imitation_terminal_condition(env,
                                  mode,
                                  dist_fail_threshold=0.3,
-                                 rot_fail_threshold= np.pi*1/6):
+                                 rot_fail_threshold= np.pi*1/8):
   """A terminal condition for motion imitation task.
 
   Args:
@@ -87,7 +87,7 @@ def imitation_terminal_condition(env,
   # Then check squared distance in other directions and check whether they are under dist_fail_threshold
   root_pos_diff = np.array(root_pos_ref) - np.array(root_pos_sim)
   xdir_pos_fail = root_pos_diff[0] > -dist_fail_threshold
-  other_pos_fail = (root_pos_diff[1]*root_pos_diff[1])+(root_pos_diff[2]*root_pos_diff[2]) > dist_fail_threshold*dist_fail_threshold
+  other_pos_fail = (root_pos_diff[1]*root_pos_diff[1])+(root_pos_diff[2]*root_pos_diff[2]) > 0.5
   root_pos_fail = xdir_pos_fail or other_pos_fail
   if (env_time<=TIME_DELAY): root_pos_fail=False
   
