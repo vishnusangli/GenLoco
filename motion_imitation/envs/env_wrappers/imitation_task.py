@@ -37,7 +37,7 @@ from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.7
 ENERGY_EXP_SCALE = 2e-2
-VEL_EN_POS = [0.4, 0.4, 0.1, 0.1]
+VEL_EN_POS = [0.4, 0.2, 0.2, 0.2]
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -384,7 +384,7 @@ class ImitationTask(object):
     height_reward = self.custom_height_reward()
 
     reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2]) + (height_reward*VEL_EN_POS[3])
-    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
+    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
 
     return reward * self._weight
   
@@ -431,8 +431,8 @@ class ImitationTask(object):
     roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-
-    return np.cos(pitch) * np.cos(yaw) * np.cos(pitch) * np.cos(yaw) * np.cos(roll)
+    reward = np.cos(pitch) * np.cos(yaw)
+    return reward * reward * reward
   
   def custom_height_reward(self):
     env = self._env
