@@ -37,7 +37,7 @@ from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.7
 ENERGY_EXP_SCALE = 2e-2
-VEL_EN_POS = [0.4, 0.2, 0.2, 0.2]
+VEL_EN_POS = np.array([0.4, 0.2, 0.2, 0.2])
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -199,6 +199,8 @@ class ImitationTask(object):
   def reset(self, env):
     """Resets the internal state of the task."""
     self._env = env
+    self._env.total_rewards = np.zeros(4)
+    self._env.reward_num = 0
     self._last_base_position = self._get_sim_base_position()
     self._episode_start_time_offset = 0.0
 
@@ -383,9 +385,12 @@ class ImitationTask(object):
     pose_reward = self.custom_pose_reward()
     height_reward = self.custom_height_reward()
 
-    reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2]) + (height_reward*VEL_EN_POS[3])
+    rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward])
+    reward = np.dot(rew, VEL_EN_POS)
     #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
 
+    self._env.total_rewards += rew
+    self._env.reward_num += 1
     return reward * self._weight
   
   def custom_reward_loco(self, tar_speed):

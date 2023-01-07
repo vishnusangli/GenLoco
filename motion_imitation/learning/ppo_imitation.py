@@ -252,6 +252,7 @@ class PPOImitation(pposgd_simple.PPO1):
                 timesteps_so_far = 0
                 iters_so_far = 0
                 t_start = time.time()
+                reward_steps = 0
 
                 # rolling buffer for episode lengths
                 len_buffer = deque(maxlen=100)
@@ -277,6 +278,7 @@ class PPOImitation(pposgd_simple.PPO1):
                         logger.log("********** Iteration %i ************" % iters_so_far)
 
                     seg = seg_gen.__next__()
+                    avg_reward = self.env.total_reward/self.env.reward_num
 
                     # Stop training early (triggered by the callback)
                     if not seg.get('continue_training', True):  # pytype: disable=attribute-error
@@ -296,6 +298,8 @@ class PPOImitation(pposgd_simple.PPO1):
                                                     writer, self.num_timesteps)
                         total_episode_length_logger(np.array(seg["ep_lens"]),
                                                     writer, episodes_so_far)
+                        reward_steps += 1
+                        custom_reward_logger(avg_reward, writer, reward_steps)
 
                     # predicted value function before udpate
                     vpredbefore = seg["vpred"]
@@ -412,7 +416,15 @@ def total_episode_length_logger(lengths, writer, steps, logname="episode_length"
     :return: (np.array float) the updated total running length
     :return: (np.array float) the updated total running length
     """
+    with tf.variable_scope("episode_info", reuse=True):
+        for env_idx in range(len(lengths)):
+            summary=tf.Summary(value=[tf.Summary.Value(tag=logname, simple_value=lengths[env_idx])])
+            writer.add_summary(summary, steps+env_idx)
 
-    for env_idx in range(len(lengths)):
-        summary=tf.Summary(value=[tf.Summary.Value(tag=logname, simple_value=lengths[env_idx])])
-        writer.add_summary(summary, steps+env_idx)
+name_list = ["velocity_reward", "energy_penalty", "pose_reward", "height_reward"]
+def custom_reward_logger(rewards, writer, steps):
+    with tf.variable_scope("episode_info", reuse=True):
+        for i in range(len(name_list)):
+            summary = tf.Summary(value=[tf.Summary.Value(tag=name_list[i], simple_value=rewards[i])])
+            writer.add_summary(summary, steps+1)
+    return steps+1
