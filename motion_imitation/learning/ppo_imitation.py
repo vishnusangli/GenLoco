@@ -278,7 +278,7 @@ class PPOImitation(pposgd_simple.PPO1):
                         logger.log("********** Iteration %i ************" % iters_so_far)
 
                     seg = seg_gen.__next__()
-                    avg_reward = self.env.total_reward/self.env.reward_num
+                    avg_reward = self.env.total_rewards/self.env.reward_num
 
                     # Stop training early (triggered by the callback)
                     if not seg.get('continue_training', True):  # pytype: disable=attribute-error

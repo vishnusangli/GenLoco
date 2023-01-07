@@ -35,7 +35,7 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.7
+TARGET_VELOCITY = 0.9
 ENERGY_EXP_SCALE = 2e-2
 VEL_EN_POS = np.array([0.4, 0.2, 0.2, 0.2])
 WALKING_MIN_HEIGHT=0.265
@@ -387,7 +387,7 @@ class ImitationTask(object):
 
     rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward])
     reward = np.dot(rew, VEL_EN_POS)
-    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
+    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
 
     self._env.total_rewards += rew
     self._env.reward_num += 1
