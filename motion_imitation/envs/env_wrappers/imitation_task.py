@@ -432,7 +432,7 @@ class ImitationTask(object):
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
     reward = np.cos(pitch) * np.cos(yaw)
-    return reward * reward * reward
+    return reward * reward * reward * reward * np.cos(roll)
   
   def custom_height_reward(self):
     env = self._env
