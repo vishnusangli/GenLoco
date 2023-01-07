@@ -35,9 +35,10 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.8
+TARGET_VELOCITY = 0.7
 ENERGY_EXP_SCALE = 5e-2
-VEL_EN_POS = [0.3, 0.7, 0.1]
+VEL_EN_POS = [0.4, 0.4, 0.1, 0.1]
+WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
     scaled_x = x *scale
@@ -380,10 +381,10 @@ class ImitationTask(object):
     loco_reward = self.custom_reward_loco(TARGET_VELOCITY)
     energy_penalty = self.custom_energy_penalty(ENERGY_EXP_SCALE)
     pose_reward = self.custom_pose_reward()
+    height_reward = self.custom_height_reward()
 
-
-    reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2])
-    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f}]--> {reward:3.2f}")
+    reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2]) + (height_reward*VEL_EN_POS[3])
+    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
 
     return reward * self._weight
   
@@ -402,7 +403,7 @@ class ImitationTask(object):
     tar_dir_speed = root_vel_sim[0]
 
     x = tar_dir_speed
-    rewards = my_tolerance(x, tar_speed, 1.2*tar_speed, 0.5*tar_speed, 0)
+    rewards = my_tolerance(x, tar_speed, 1.5*tar_speed, 0.5*tar_speed, 0)
     #print(f"Reward: {tar_dir_speed:4.2f} ", end="")
     return rewards
 
@@ -432,6 +433,17 @@ class ImitationTask(object):
     yaw = roll_pitch_yaw[2]
 
     return np.cos(pitch) * np.cos(yaw) * np.cos(pitch) * np.cos(yaw) * np.cos(roll)
+  
+  def custom_height_reward(self):
+    env = self._env
+    robot = env.robot
+    sim_model = robot.quadruped
+    pyb = env._pybullet_client
+    root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
+    env.robot.quadruped)
+    return my_tolerance(root_pos_sim[2], WALKING_MIN_HEIGHT, 1.15*WALKING_MIN_HEIGHT, 0.5*WALKING_MIN_HEIGHT, 0)
+
+
 
   def _calc_reward_pose(self):
     """Get the pose reward."""

@@ -25,7 +25,7 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.8
+TARGET_VELOCITY = 0.6
 TIME_DELAY=1
 
 """
@@ -90,7 +90,7 @@ def imitation_terminal_condition(env,
   other_pos_fail = (root_pos_diff[1]*root_pos_diff[1])+(root_pos_diff[2]*root_pos_diff[2]) > 0.5
   root_pos_fail = xdir_pos_fail or other_pos_fail
   if (env_time<=TIME_DELAY): root_pos_fail=False
-  
+
   roll_pitch_yaw = np.array(env.robot.GetTrueBaseRollPitchYaw())
   root_rot_fail = np.any(roll_pitch_yaw > rot_fail_threshold)
 
