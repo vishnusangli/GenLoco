@@ -384,7 +384,7 @@ class ImitationTask(object):
     height_reward = self.custom_height_reward()
 
     reward = (loco_reward * VEL_EN_POS[0]) + (energy_penalty * VEL_EN_POS[1]) + (pose_reward * VEL_EN_POS[2]) + (height_reward*VEL_EN_POS[3])
-    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
+    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f}]--> {reward:3.2f}")
 
     return reward * self._weight
   
@@ -441,7 +441,7 @@ class ImitationTask(object):
     pyb = env._pybullet_client
     root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
     env.robot.quadruped)
-    return my_tolerance(root_pos_sim[2], WALKING_MIN_HEIGHT, 1.15*WALKING_MIN_HEIGHT, 0.*WALKING_MIN_HEIGHT, 0)
+    return my_tolerance(root_pos_sim[2], WALKING_MIN_HEIGHT, 1.15*WALKING_MIN_HEIGHT, 0.3*WALKING_MIN_HEIGHT, 0)
 
 
 
