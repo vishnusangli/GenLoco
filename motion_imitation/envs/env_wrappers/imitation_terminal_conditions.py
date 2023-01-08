@@ -25,7 +25,7 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.7
+TARGET_VELOCITY = 0.6
 TIME_DELAY=1.0
 
 """
@@ -106,8 +106,8 @@ def imitation_terminal_condition(env,
   done = root_pos_fail \
       or root_rot_fail \
       or contact_fall
-  if done:
-    print(f"Fail: {root_rot_fail:1.0f} ({xdir_pos_fail:1.0f}{other_pos_fail:1.0f}) {contact_fall:1.0f} | {task._get_motion_time():8.2f} | {np.array2string(root_pos_diff, precision=1)}")
+  # if done:
+  #   print(f"Fail: {root_rot_fail:1.0f} ({xdir_pos_fail:1.0f}{other_pos_fail:1.0f}) {contact_fall:1.0f} | {task._get_motion_time():8.2f} | {np.array2string(root_pos_diff, precision=1)}")
   # if mode =="test":
   #   done=contact_fall or motion_over
   return done
