@@ -421,10 +421,10 @@ def total_episode_length_logger(lengths, writer, steps, logname="episode_length"
             summary=tf.Summary(value=[tf.Summary.Value(tag=logname, simple_value=lengths[env_idx])])
             writer.add_summary(summary, steps+env_idx)
 
-name_list = ["velocity_reward", "energy_penalty", "pose_reward", "height_reward"]
+name_list = ["velocity_reward", "energy_penalty", "pose_reward", "height_reward", "deviation_penalty"]
 def custom_reward_logger(rewards, writer, steps):
-    with tf.variable_scope("episode_info", reuse=True):
+    with tf.variable_scope("avg_reward", reuse=True):
         for i in range(len(name_list)):
-            summary = tf.Summary(value=[tf.Summary.Value(tag=name_list[i], simple_value=rewards[i])])
+            summary = tf.Summary(value=[tf.Summary.Value(tag=f"avg_reward/{name_list[i]}", simple_value=rewards[i])])
             writer.add_summary(summary, steps+1)
     return steps+1
