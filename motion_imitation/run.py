@@ -85,7 +85,7 @@ def build_model(env, num_procs, timesteps_per_actorbatch, optim_batchsize, outpu
                timesteps_per_actorbatch=timesteps_per_actorbatch,
                clip_param=0.2,
                optim_epochs=1,
-               optim_stepsize=1e-3,
+               optim_stepsize=1e-6,
                optim_batchsize=optim_batchsize,
                lam=0.95,
                adam_epsilon=1e-5,

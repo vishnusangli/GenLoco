@@ -35,9 +35,9 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.8
-ENERGY_EXP_SCALE = 2e-2
-VEL_EN_POS = np.array([0.5, 0.2, 0.1, 0.1, 0.1])
+TARGET_VELOCITY = 0.4
+ENERGY_EXP_SCALE = 1e-2
+VEL_EN_POS = np.array([0.5, 0.3, 0.1, 0.1])
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -384,9 +384,8 @@ class ImitationTask(object):
     energy_penalty = self.custom_energy_penalty(ENERGY_EXP_SCALE)
     pose_reward = self.custom_pose_reward()
     height_reward = self.custom_height_reward()
-    custom_deviation = self.custom_deviation_penalty()
 
-    rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, custom_deviation])
+    rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward])
     reward = np.dot(rew, VEL_EN_POS)
     #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {custom_deviation:3.2f}]--> {reward:3.2f}")
 
@@ -409,7 +408,7 @@ class ImitationTask(object):
     tar_dir_speed = root_vel_sim[0]
 
     x = tar_dir_speed
-    rewards = my_tolerance(x, tar_speed, 1.5*tar_speed, 0.5*tar_speed, 0)
+    rewards = my_tolerance(x, tar_speed, 0.6, 0.3*tar_speed, 0)
     #print(f"Reward: {tar_dir_speed:4.2f} ", end="")
     return rewards
 
@@ -423,7 +422,7 @@ class ImitationTask(object):
     sim_model = robot.quadruped
     pyb = self._get_pybullet_client()
     energy_consumption = - np.sum(np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()))
-    assert np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()).shape == robot.GetMotorTorques().shape
+    #assert np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()).shape == robot.GetMotorTorques().shape
     return np.exp(scale_var * energy_consumption)
 
   def custom_pose_reward(self):
@@ -437,8 +436,8 @@ class ImitationTask(object):
     roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-    reward = np.cos(pitch) * np.cos(yaw)
-    return reward * reward * reward * reward * np.cos(roll)
+    reward = np.cos(pitch) * np.cos(yaw) * np.cos(roll)
+    return reward * reward * reward * reward * reward
   
   def custom_height_reward(self):
     env = self._env
