@@ -25,7 +25,7 @@ from utilities import pose3d
 from utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.4
+TARGET_VELOCITY = 0.1
 TIME_DELAY=1.0
 
 """
