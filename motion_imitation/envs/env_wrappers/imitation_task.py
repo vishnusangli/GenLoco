@@ -36,8 +36,8 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.75
-ENERGY_EXP_SCALE = 5e-2
-VEL_EN_POS = np.array([0.5, 0.3, 0.1, 0.,  0.1])
+ENERGY_EXP_SCALE = 1e-2
+VEL_EN_POS = np.array([0.4, 0.3, 0.1, 0.1,  0.1])
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -455,7 +455,7 @@ class ImitationTask(object):
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    return np.exp(- 50 * root_vel_sim[1]*root_vel_sim[1])
+    return np.exp(- 30 * root_vel_sim[1]*root_vel_sim[1])
 
 
 
