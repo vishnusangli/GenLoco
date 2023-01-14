@@ -35,9 +35,9 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.75
+TARGET_VELOCITY = 0.85
 ENERGY_EXP_SCALE = 1e-2
-VEL_EN_POS = np.array([0.4, 0.3, 0.1, 0.1,  0.1])
+VEL_EN_POS = np.array([0.3, 0.3, 0.2, 0.1, 0.1])
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -388,7 +388,7 @@ class ImitationTask(object):
 
     rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty])
     reward = np.dot(rew, VEL_EN_POS)
-    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
+    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
 
     self._env.total_rewards += rew
     self._env.reward_num += 1
@@ -409,7 +409,7 @@ class ImitationTask(object):
     tar_dir_speed = root_vel_sim[0]
 
     x = tar_dir_speed
-    rewards = my_tolerance(x, tar_speed, 0.9, 0.5*tar_speed, 0)
+    rewards = my_tolerance(x, tar_speed, 1.05, 0.5*tar_speed, 0)
     #print(f"Reward: {tar_dir_speed:4.2f} ", end="")
     return rewards
 
