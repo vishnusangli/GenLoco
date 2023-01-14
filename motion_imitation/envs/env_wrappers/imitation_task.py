@@ -388,7 +388,7 @@ class ImitationTask(object):
 
     rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty])
     reward = np.dot(rew, VEL_EN_POS)
-    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
+    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
 
     self._env.total_rewards += rew
     self._env.reward_num += 1
@@ -409,7 +409,7 @@ class ImitationTask(object):
     tar_dir_speed = root_vel_sim[0]
 
     x = tar_dir_speed
-    rewards = my_tolerance(x, tar_speed, 1.05, 0.5*tar_speed, 0)
+    rewards = my_tolerance(x, tar_speed, 1.25, 0.5*tar_speed, 0)
     #print(f"Reward: {tar_dir_speed:4.2f} ", end="")
     return rewards
 
@@ -455,7 +455,7 @@ class ImitationTask(object):
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    return np.exp(- 50 * root_vel_sim[1]*root_vel_sim[1])
+    return np.exp(- 40 * root_vel_sim[1]*root_vel_sim[1])
 
 
 
