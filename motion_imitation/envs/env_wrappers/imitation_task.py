@@ -37,7 +37,7 @@ from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.85
 ENERGY_EXP_SCALE = 1e-2
-VEL_EN_POS = np.array([0.3, 0.3, 0.2, 0.1, 0.1])
+VEL_EN_POS = np.array([0.1, 0.3, 0.2, 0.2, 0.2])
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
@@ -388,7 +388,7 @@ class ImitationTask(object):
 
     rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty])
     reward = np.dot(rew, VEL_EN_POS)
-    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
+    #print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
 
     self._env.total_rewards += rew
     self._env.reward_num += 1
@@ -455,7 +455,7 @@ class ImitationTask(object):
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    return np.exp(- 40 * root_vel_sim[1]*root_vel_sim[1])
+    return np.exp(- 30 * root_vel_sim[1]*root_vel_sim[1])
 
 
 
