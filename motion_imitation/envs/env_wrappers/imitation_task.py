@@ -455,7 +455,7 @@ class ImitationTask(object):
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    return np.exp(- 30 * root_vel_sim[1]*root_vel_sim[1])
+    return np.exp(- 50 * root_vel_sim[1]*root_vel_sim[1])
 
 
 
