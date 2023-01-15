@@ -38,7 +38,7 @@ from pybullet_utils import transformations
 TARGET_VELOCITY = 0.85
 ENERGY_EXP_SCALE = 1e-2
 #velocity, energy, pose, height, deviation
-VEL_EN_POS = np.array([0.1, 0.3, 0.4, 0.1, 0.1])
+VEL_EN_POS = np.array([0.3, 0.3, 0.2, 0.1, 0.1])
 WALKING_MIN_HEIGHT=0.265
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1

@@ -438,7 +438,7 @@ def subreward_return_logger(rewards, lengths, writer, steps):
             summary = tf.Summary(value=[tf.Summary.Value(tag=f"normalized_subreward_return/{name_list[subreward]}", simple_value=curr_returns[subreward]/EPISODE_LEN)])
             writer.add_summary(summary, steps+env_idx)
 
-            summary = tf.Summary(value=[tf.Summary.Value(tag=f"episode_avg_reward/{name_list[subreward]}", simple_value=curr_returns[subreward]/lengths[env_idx])])
-            writer.add_summary(summary, steps+env_idx)
+            summary2 = tf.Summary(value=[tf.Summary.Value(tag=f"episode_avg_reward/{name_list[subreward]}", simple_value=curr_returns[subreward]/lengths[env_idx])])
+            writer.add_summary(summary2, steps+env_idx)
 
             
