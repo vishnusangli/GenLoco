@@ -17,6 +17,7 @@ import gym
 import numpy as np
 
 from stable_baselines.common.vec_env import VecEnv
+from motion_imitation.envs.env_wrappers.imitation_task import VEL_EN_POS
 
 def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, callback=None):
     """
@@ -54,9 +55,11 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
     current_it_len = 0  # len of current iteration
     current_ep_len = 0 # len of current episode
     cur_ep_true_ret = 0
+    cur_ep_ret_portion = np.zeros(len(VEL_EN_POS))
     ep_true_rets = []
     ep_rets = []  # returns of completed episodes in this segment
     ep_lens = []  # Episode lengths
+    ep_ret_portions = []
 
     # Initialize history arrays
     observations = np.array([observation for _ in range(horizon)])
@@ -101,7 +104,8 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
                     "ep_lens": ep_lens,
                     "ep_true_rets": ep_true_rets,
                     "total_timestep": current_it_len,
-                    'continue_training': True
+                    'continue_training': True,
+                    'return_portions': np.array(ep_ret_portions)
             }
             _, vpred, _, info = policy.step(observation.reshape(-1, *observation.shape))
             # Be careful!!! if you change the downstream algorithm to aggregate
@@ -109,6 +113,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
             ep_rets = []
             ep_true_rets = []
             ep_lens = []
+            ep_ret_portions = []
             # Reset current iteration length
             current_it_len = 0
             callback.on_rollout_start()
@@ -150,7 +155,8 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
                     "ep_lens": ep_lens,
                     "ep_true_rets": ep_true_rets,
                     "total_timestep": current_it_len,
-                    'continue_training': False
+                    'continue_training': False,
+                    'return_portions': np.array(ep_ret_portions)
                     }
                 return
 
@@ -163,6 +169,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
         cur_ep_true_ret += true_reward
         current_it_len += 1
         current_ep_len += 1
+        cur_ep_ret_portion += env.aggregate_returns
         if done:
             terminated = ("terminated" not in info) or info["terminated"]
             if terminated:
@@ -182,9 +189,11 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
             ep_rets.append(cur_ep_ret)
             ep_true_rets.append(cur_ep_true_ret)
             ep_lens.append(current_ep_len)
+            ep_ret_portions.append(cur_ep_ret_portion)
             cur_ep_ret = 0
             cur_ep_true_ret = 0
             current_ep_len = 0
+            cur_ep_ret_portion = np.zeros(len(VEL_EN_POS))
             if not isinstance(env, VecEnv):
                 observation = env.reset()
 

@@ -252,7 +252,6 @@ class PPOImitation(pposgd_simple.PPO1):
                 timesteps_so_far = 0
                 iters_so_far = 0
                 t_start = time.time()
-                reward_steps = 0
 
                 # rolling buffer for episode lengths
                 len_buffer = deque(maxlen=100)
@@ -278,7 +277,7 @@ class PPOImitation(pposgd_simple.PPO1):
                         logger.log("********** Iteration %i ************" % iters_so_far)
 
                     seg = seg_gen.__next__()
-                    avg_reward = self.env.total_rewards/self.env.reward_num
+                    #avg_reward = self.env.total_rewards/self.env.reward_num
 
                     # Stop training early (triggered by the callback)
                     if not seg.get('continue_training', True):  # pytype: disable=attribute-error
@@ -298,8 +297,8 @@ class PPOImitation(pposgd_simple.PPO1):
                                                     writer, self.num_timesteps)
                         total_episode_length_logger(np.array(seg["ep_lens"]),
                                                     writer, episodes_so_far)
-                        reward_steps += 1
-                        custom_reward_logger(avg_reward, writer, reward_steps)
+                        subreward_return_logger(seg["return_portions"], np.array(seg["ep_lens"]), writer, episodes_so_far)
+                        #custom_reward_logger(avg_reward, writer, reward_steps)
 
                     # predicted value function before udpate
                     vpredbefore = seg["vpred"]
@@ -428,3 +427,18 @@ def custom_reward_logger(rewards, writer, steps):
             summary = tf.Summary(value=[tf.Summary.Value(tag=f"avg_reward/{name_list[i]}", simple_value=rewards[i])])
             writer.add_summary(summary, steps+1)
     return steps+1
+
+from motion_imitation.envs.env_builder import EPISODE_LEN
+#from motion_imitation.envs.env_wrappers.imitation_task import VEL_EN_POS
+#MAXIMUM_SUBRETURNS = VEL_EN_POS*EPISODE_LEN
+def subreward_return_logger(rewards, lengths, writer, steps):
+    for env_idx in range(len(rewards)):
+        curr_returns = rewards[env_idx]
+        for subreward in range(len(name_list)):
+            summary = tf.Summary(value=[tf.Summary.Value(tag=f"normalized_subreward_return/{name_list[subreward]}", simple_value=curr_returns[subreward]/EPISODE_LEN)])
+            writer.add_summary(summary, steps+env_idx)
+
+            summary = tf.Summary(value=[tf.Summary.Value(tag=f"episode_avg_reward/{name_list[subreward]}", simple_value=curr_returns[subreward]/lengths[env_idx])])
+            writer.add_summary(summary, steps+env_idx)
+
+            

@@ -38,7 +38,7 @@ from motion_imitation.robots import a1
 from motion_imitation.robots import robot_config
 
 
-
+EPISODE_LEN=2000
 
 
 def build_laikago_env( motor_control_mode, enable_rendering):
@@ -82,8 +82,8 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   visualize = (not enable_randomized_robot) and enable_rendering
   assert len(motion_files) > 0
 
-  curriculum_episode_length_start =6000
-  curriculum_episode_length_end = 6000
+  curriculum_episode_length_start =EPISODE_LEN
+  curriculum_episode_length_end = EPISODE_LEN
   
   sim_params = locomotion_gym_config.SimulationParameters()
   sim_params.enable_rendering = enable_rendering
