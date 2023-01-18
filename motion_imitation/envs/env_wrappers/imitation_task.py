@@ -38,8 +38,8 @@ from pybullet_utils import transformations
 TARGET_VELOCITY = 0.85
 ENERGY_EXP_SCALE = 1e-2
 #velocity, energy, pose, height, deviation
-VEL_EN_POS = np.array([0.5, 0.2, 0.2, 0.1, 0.1])
-WALKING_MIN_HEIGHT=0.265
+VEL_EN_POS = np.array([0.5, 0.2, 0.1, 0.1, 0.1])
+WALKING_MIN_HEIGHT=0.27
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
     scaled_x = x *scale
@@ -438,7 +438,7 @@ class ImitationTask(object):
     yaw = roll_pitch_yaw[2]
     reward = np.abs(pitch) + np.abs(yaw) + np.abs(roll)
 
-    return np.exp(- 4.5 * reward)
+    return np.exp(- 4 * reward)
   
   def custom_height_reward(self):
     env = self._env
@@ -455,7 +455,7 @@ class ImitationTask(object):
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    return np.exp(- 20 * root_vel_sim[1]*root_vel_sim[1])
+    return np.exp(- 30 * root_vel_sim[1]*root_vel_sim[1])
 
 
 
