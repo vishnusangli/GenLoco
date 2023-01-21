@@ -36,10 +36,10 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 TARGET_VELOCITY = 0.85
-ENERGY_EXP_SCALE = 1e-2
+ENERGY_EXP_SCALE = 1e-3
 #velocity, energy, pose, height, deviation
-VEL_EN_POS = np.array([0.5, 0.2, 0.1, 0.1, 0.1])
-WALKING_MIN_HEIGHT=0.27
+VEL_EN_POS = np.array([0.5, 0.05, 0.15, 0.15, 0.15])
+WALKING_MIN_HEIGHT=0.32
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
     scaled_x = x *scale
@@ -436,9 +436,9 @@ class ImitationTask(object):
     roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-    reward = np.abs(pitch) + np.abs(yaw) + np.abs(roll)
+    reward = np.abs(pitch) + np.abs(yaw)
 
-    return np.exp(- 4 * reward)
+    return np.exp(- 3 * reward)
   
   def custom_height_reward(self):
     env = self._env
@@ -447,7 +447,7 @@ class ImitationTask(object):
     pyb = env._pybullet_client
     root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
     env.robot.quadruped)
-    return my_tolerance(root_pos_sim[2], WALKING_MIN_HEIGHT, 1.15*WALKING_MIN_HEIGHT, 0.3*WALKING_MIN_HEIGHT, 0)
+    return my_tolerance(root_pos_sim[2], WALKING_MIN_HEIGHT, 1.15*WALKING_MIN_HEIGHT, 0.5*WALKING_MIN_HEIGHT, 0)
   
   def custom_deviation_penalty(self):
     env = self._env
