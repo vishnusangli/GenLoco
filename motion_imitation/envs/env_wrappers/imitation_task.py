@@ -43,13 +43,13 @@ TARGET_VELOCITY = 0.85
 LOCO_SLOPE = 1
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 9e-3
+ENERGY_EXP_SCALE = 8e-3
 
 ### POSE ### (exp)
 POSE_SCALING=4
 
 ### HEIGHT ### (Tolerance)
-WALKING_MIN_HEIGHT=0.4
+WALKING_MIN_HEIGHT=0.42
 HEIGHT_SLOPE = 1
 
 ### DEVIATION ### (exp)
@@ -369,7 +369,7 @@ class ImitationTask(object):
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
     root_vel_sim = np.array(root_vel_sim)
     tar_dir_speed = root_vel_sim[0]
-    print(tar_dir_speed)
+
     rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0)
     return rewards
 
