@@ -129,7 +129,7 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
                                         tar_frame_steps=[1, 2, 10, 30],
                                         ref_state_init_prob=ref_state_init_prob,
                                         warmup_time=0.25,
-                                        visualize=False)
+                                        visualize=visualize)
 
   randomizers = []
   if enable_randomizer:

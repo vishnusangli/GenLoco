@@ -225,8 +225,6 @@ class ImitationTask(object):
       self._active_motion_id = self._sample_ref_motion()
 
     if (self._ref_model is None or self._env.hard_reset):
-      if self._visualize:
-        self._ref_model = self._build_ref_model()
       self._build_joint_data()
 
     if self._default_pose is None or self._env.hard_reset:
@@ -311,47 +309,6 @@ class ImitationTask(object):
       An array containing the target frames.
     """
     return np.array([TARGET_VELOCITY])
-    time0 = self._get_motion_time()
-    dt = self._env.env_time_step
-    motion = self.get_active_motion()
-
-    if use_phase:
-      phase = np.array(motion.calc_phase(time0)).reshape((1))
-      return phase
-
-    robot = self._env.robot
-    ref_base_pos = self._get_ref_base_position()
-    sim_base_rot = np.array(robot.GetBaseOrientation())
-
-    heading = motion_util.calc_heading(sim_base_rot)
-    if self._tar_obs_noise is not None:
-      heading += self._randn(0, self._tar_obs_noise[0])
-    inv_heading_rot = transformations.quaternion_about_axis(-heading, [0, 0, 1])
-
-    tar_poses = []
-    for step in self._tar_frame_steps:
-      tar_time = time0 + step * dt
-      tar_pose = self._calc_ref_pose(tar_time)
-
-      tar_root_pos = motion.get_frame_root_pos(tar_pose)
-      tar_root_rot = motion.get_frame_root_rot(tar_pose)
-
-      tar_root_pos -= ref_base_pos
-      tar_root_pos = pose3d.QuaternionRotatePoint(tar_root_pos, inv_heading_rot)
-
-      tar_root_rot = transformations.quaternion_multiply(
-          inv_heading_rot, tar_root_rot)
-      tar_root_rot = motion_util.standardize_quaternion(tar_root_rot)
-
-      motion.set_frame_root_pos(tar_root_pos, tar_pose)
-      motion.set_frame_root_rot(tar_root_rot, tar_pose)
-
-      tar_poses.append(tar_pose)
-
-    tar_obs = np.concatenate(tar_poses, axis=-1)
-
-    return tar_obs
-
   def get_target_obs_bounds(self, use_phase=True):
     """Get bounds for target observations.
 
@@ -370,18 +327,6 @@ class ImitationTask(object):
     pose_size = self.get_pose_size()
     low = np.inf * np.ones(pose_size)
     high = -np.inf * np.ones(pose_size)
-    for m in self._ref_motions:
-      curr_frames = m.get_frames()
-      curr_low = np.min(curr_frames, axis=0)
-      curr_high = np.max(curr_frames, axis=0)
-      low = np.minimum(low, curr_low)
-      high = np.maximum(high, curr_high)
-
-    motion = self.get_active_motion()
-    motion.set_frame_root_pos(-pos_bound, low)
-    motion.set_frame_root_pos(pos_bound, high)
-    motion.set_frame_root_rot(-rot_bound, low)
-    motion.set_frame_root_rot(rot_bound, high)
 
     num_tar_frames = self.get_num_tar_frames()
     low = np.concatenate([low] * num_tar_frames, axis=-1)
@@ -468,154 +413,6 @@ class ImitationTask(object):
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
     return np.exp(- scaling * root_vel_sim[1]*root_vel_sim[1])
 
-
-  def _calc_reward_pose(self):
-    """Get the pose reward."""
-    env = self._env
-    robot = env.robot
-    sim_model = robot.quadruped
-    pyb = self._get_pybullet_client()
-
-    pose_err = 0.0
-    num_joints = self._get_num_joints()
-
-    for j in range(num_joints):
-      if self._get_joint_pose_size(j) > 0:
-        j_state_sim = pyb.getJointStateMultiDof(sim_model, j)
-        j_pose_sim = np.array(j_state_sim[0])
-        j_pose_ref = self._ref_pose[self._get_joint_pose_idx(j)]
-        j_pose_diff = j_pose_ref - j_pose_sim
-        j_pose_err = j_pose_diff.dot(j_pose_diff)
-        pose_err += j_pose_err
-
-    pose_reward = np.exp(-self._pose_err_scale * pose_err)
-
-    return pose_reward
-
-  def _calc_reward_velocity(self):
-    """Get the velocity reward."""
-    env = self._env
-    robot = env.robot
-    sim_model = robot.quadruped
-    pyb = self._get_pybullet_client()
-
-    vel_err = 0.0
-    num_joints = self._get_num_joints()
-
-    for j in range(num_joints):
-      if self._get_joint_vel_size(j) > 0:
-        j_state_sim = pyb.getJointStateMultiDof(sim_model, j)
-        j_vel_sim = np.array(j_state_sim[1])
-        j_vel_ref = self._ref_vel[self._get_joint_vel_idx(j)]
-        j_vel_diff = j_vel_ref - j_vel_sim
-        j_vel_err = j_vel_diff.dot(j_vel_diff)
-        vel_err += j_vel_err
-
-    vel_reward = np.exp(-self._velocity_err_scale * vel_err)
-
-    return vel_reward
-
-  def _calc_reward_end_effector(self):
-    """Get the end effector reward."""
-    env = self._env
-    robot = env.robot
-    sim_model = robot.quadruped
-    ref_model = self._ref_model
-    pyb = self._get_pybullet_client()
-
-    root_pos_ref = self._get_ref_base_position()
-    root_rot_ref = self._get_ref_base_rotation()
-    root_pos_sim = self._get_sim_base_position()
-    root_rot_sim = self._get_sim_base_rotation()
-
-    heading_rot_ref = self._calc_heading_rot(root_rot_ref)
-    heading_rot_sim = self._calc_heading_rot(root_rot_sim)
-    inv_heading_rot_ref = transformations.quaternion_conjugate(heading_rot_ref)
-    inv_heading_rot_sim = transformations.quaternion_conjugate(heading_rot_sim)
-
-    end_eff_err = 0.0
-    num_joints = self._get_num_joints()
-    height_err_scale = self._end_effector_height_err_scale
-
-    for j in range(num_joints):
-      is_end_eff = (j in robot._foot_link_ids)
-      if (is_end_eff):
-        end_state_ref = pyb.getLinkState(ref_model, j)
-        end_state_sim = pyb.getLinkState(sim_model, j)
-        end_pos_ref = np.array(end_state_ref[0])
-        end_pos_sim = np.array(end_state_sim[0])
-
-        rel_end_pos_ref = end_pos_ref - root_pos_ref
-        rel_end_pos_ref = pose3d.QuaternionRotatePoint(rel_end_pos_ref,
-                                                       inv_heading_rot_ref)
-
-        rel_end_pos_sim = end_pos_sim - root_pos_sim
-        rel_end_pos_sim = pose3d.QuaternionRotatePoint(rel_end_pos_sim,
-                                                       inv_heading_rot_sim)
-
-        rel_end_pos_diff = rel_end_pos_ref - rel_end_pos_sim
-        end_pos_diff_height = end_pos_ref[2] - end_pos_sim[2]
-
-        end_pos_err = (
-            rel_end_pos_diff[0] * rel_end_pos_diff[0] +
-            rel_end_pos_diff[1] * rel_end_pos_diff[1] +
-            height_err_scale * end_pos_diff_height * end_pos_diff_height)
-
-        end_eff_err += end_pos_err
-
-    end_eff_err *= self._robot_scale()**2
-
-    end_effector_reward = np.exp(-self._end_effector_err_scale * end_eff_err)
-
-    return end_effector_reward
-
-  def _calc_reward_root_pose(self):
-    """Get the root pose reward."""
-    root_pos_ref = self._get_ref_base_position()
-    root_rot_ref = self._get_ref_base_rotation()
-    root_pos_sim = self._get_sim_base_position()
-    root_rot_sim = self._get_sim_base_rotation()
-
-    root_pos_diff = root_pos_ref - root_pos_sim
-    root_pos_err = root_pos_diff.dot(root_pos_diff)
-
-    root_rot_diff = transformations.quaternion_multiply(
-        root_rot_ref, transformations.quaternion_conjugate(root_rot_sim))
-    _, root_rot_diff_angle = pose3d.QuaternionToAxisAngle(root_rot_diff)
-    root_rot_diff_angle = motion_util.normalize_rotation_angle(
-        root_rot_diff_angle)
-    root_rot_err = root_rot_diff_angle * root_rot_diff_angle
-
-    root_pose_err = (self._robot_scale()**2) * root_pos_err + 0.5 * root_rot_err
-    root_pose_reward = np.exp(-self._root_pose_err_scale * root_pose_err)
-
-    return root_pose_reward
-
-  def _calc_reward_root_velocity(self):
-    """Get the root velocity reward."""
-    env = self._env
-    robot = env.robot
-    sim_model = robot.quadruped
-    pyb = self._get_pybullet_client()
-
-    root_vel_ref, root_ang_vel_ref = tuple(self._ref_vel[:3]), tuple(self._ref_vel[3:6])
-    root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    root_vel_ref = np.array(root_vel_ref)
-    root_ang_vel_ref = np.array(root_ang_vel_ref)
-    root_vel_sim = np.array(root_vel_sim)
-    root_ang_vel_sim = np.array(root_ang_vel_sim)
-
-    root_vel_diff = root_vel_ref - root_vel_sim
-    root_vel_err = root_vel_diff.dot(root_vel_diff)
-
-    root_ang_vel_diff = root_ang_vel_ref - root_ang_vel_sim
-    root_ang_vel_err = root_ang_vel_diff.dot(root_ang_vel_diff)
-
-    root_velocity_err = (self._robot_scale()**2) * root_vel_err + 0.1 * root_ang_vel_err
-    root_velocity_reward = np.exp(-self._root_velocity_err_scale *
-                                  root_velocity_err)
-
-    return root_velocity_reward
 
   def _load_ref_motions(self, filenames):
     """Load reference motions.
@@ -781,44 +578,16 @@ class ImitationTask(object):
 
     model with the current motion frame.
     """
-    time = self._get_motion_time()
-    change_clip = self._check_change_clip()
 
-    if change_clip:
-      new_motion_id = self._sample_ref_motion()
-      self._change_ref_motion(new_motion_id)
-      self._reset_clip_change_time()
-      self._motion_time_offset = self._sample_time_offset()
-
-    motion = self.get_active_motion()
-    new_phase = motion.calc_phase(time)
-
-    if (self._enable_cycle_sync and (new_phase < self._prev_motion_phase)) \
-        or change_clip:
-      self._sync_ref_origin(
-          sync_root_position=True, sync_root_rotation=self._enable_sync_root_rotation) 
-
-    self._update_ref_state()
-    self._update_ref_model()
-
-    self._prev_motion_phase = new_phase
 
     return
 
-  def _update_ref_state(self):
-    """Calculates and stores the current reference pose and velocity."""
-    time = self._get_motion_time()
-    self._ref_pose = self._calc_ref_pose(time)
-    self._ref_vel = self._calc_ref_vel(time)
-    return
 
   def _update_ref_model(self):
     """Synchronizes the reference model to the pose and velocity of the
 
     reference motion. Only done if visualization is enabled.
     """
-    if self._visualize:
-        self._set_state(self._ref_model, self._ref_pose, self._ref_vel)
     return
 
   def _sync_sim_model(self, perturb_state):
@@ -831,8 +600,6 @@ class ImitationTask(object):
     """
     pose = self._ref_pose
     vel = self._ref_vel
-    if perturb_state:
-      pose, vel = self._apply_state_perturb(pose, vel)
 
     self._set_state(self._env.robot.quadruped, pose, vel)
     self._env.robot.ReceiveObservation()
@@ -1176,12 +943,7 @@ class ImitationTask(object):
     return change
 
   def _reset_motion_time_offset(self):
-    if not self._enable_rand_init_time:
-      self._motion_time_offset = 0.0
-    elif self._curr_episode_warmup:
-      self._motion_time_offset = self._rand_uniform(0, self._warmup_time)
-    else:
-      self._motion_time_offset = self._sample_time_offset()
+    self._motion_time_offset = 0.0
     return
 
   def _sample_time_offset(self):
