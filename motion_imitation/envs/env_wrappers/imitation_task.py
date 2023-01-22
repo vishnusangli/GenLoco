@@ -35,11 +35,27 @@ from motion_imitation.utilities import motion_data
 from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
-TARGET_VELOCITY = 0.85
-ENERGY_EXP_SCALE = 9e-3
 #velocity, energy, pose, height, deviation
-VEL_EN_POS = np.array([0.3, 0.3, 0.2, 0.1, 0.1])
+SUBREWARD_WEIGHTS = np.array([0.3, 0.3, 0.2, 0.1, 0.1])
+
+### Loco ### (Tolerance)
+TARGET_VELOCITY = 0.85
+LOCO_SLOPE = 1
+
+### Energy ### (exp)
+ENERGY_EXP_SCALE = 9e-3
+
+### POSE ### (exp)
+POSE_SCALING=4
+
+### HEIGHT ### (Tolerance)
 WALKING_MIN_HEIGHT=0.28
+HEIGHT_SLOPE = 0.3
+
+### DEVIATION ### (exp)
+DEVIATION_SCALING=30
+
+
 def linear_sigmoid(x, val_at_1):
     scale = 1 - val_at_1
     scaled_x = x *scale
@@ -380,20 +396,22 @@ class ImitationTask(object):
   def reward(self, env):
     """Get the reward without side effects."""
     del env
-    loco_reward = self.custom_reward_loco(TARGET_VELOCITY)
+    loco_reward = self.custom_reward_loco(TARGET_VELOCITY, LOCO_SLOPE)
     energy_penalty = self.custom_energy_penalty(ENERGY_EXP_SCALE)
-    pose_reward = self.custom_pose_reward()
-    height_reward = self.custom_height_reward()
-    deviation_penalty = self.custom_deviation_penalty()
+    pose_reward = self.custom_pose_reward(POSE_SCALING)
+    height_reward = self.custom_height_reward(WALKING_MIN_HEIGHT, HEIGHT_SLOPE)
+    deviation_penalty = self.custom_deviation_penalty(DEVIATION_SCALING)
 
     rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty])
-    reward = np.dot(rew, VEL_EN_POS)
-    print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
+    reward = np.dot(rew, SUBREWARD_WEIGHTS)
+
+    if self._visualize:
+      print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
 
     self._env.aggregate_returns = rew
     return reward * self._weight
   
-  def custom_reward_loco(self, tar_speed):
+  def custom_reward_loco(self, tar_speed, slope):
     """Return the locomotion reward as according to the walk-in-the park
     
     This function is normalized at [0, 1]
@@ -407,56 +425,48 @@ class ImitationTask(object):
     root_vel_sim = np.array(root_vel_sim)
     tar_dir_speed = root_vel_sim[0]
 
-    x = tar_dir_speed
-    rewards = my_tolerance(x, tar_speed, 1.2, tar_speed, 0)
-    #print(f"Reward: {tar_dir_speed:4.2f} ", end="")
+    rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0)
     return rewards
 
-  def custom_energy_penalty(self, scale_var):
+  def custom_energy_penalty(self, scaling):
     """Returns the energy penalty in terms of motor angular velocities and torques
     
     Need to check the normalization of this func
     """
     env = self._env
     robot = env.robot
-    sim_model = robot.quadruped
-    pyb = self._get_pybullet_client()
     energy_consumption = - np.sum(np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()))
-    #assert np.abs(robot.GetMotorTorques() * robot.GetMotorVelocities()).shape == robot.GetMotorTorques().shape
-    return np.exp(scale_var * energy_consumption)
+    return np.exp(scaling * energy_consumption)
 
-  def custom_pose_reward(self):
+  def custom_pose_reward(self, scaling):
     """Rewards an upright cheetah. Ignored roll since it is needed for movement?
     
     """
     env = self._env
     robot = env.robot
-    sim_model = robot.quadruped
     roll_pitch_yaw = robot.GetTrueBaseRollPitchYaw()
-    roll = roll_pitch_yaw[0]
+    #roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
     reward = np.abs(pitch) + np.abs(yaw)
-
-    return np.exp(- 4 * reward)
+    return np.exp(- scaling * reward)
   
-  def custom_height_reward(self):
+  def custom_height_reward(self, min_height, slope):
     env = self._env
     robot = env.robot
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
     env.robot.quadruped)
-    return my_tolerance(root_pos_sim[2], WALKING_MIN_HEIGHT, 0.32, 0.3*WALKING_MIN_HEIGHT, 0)
+    return my_tolerance(root_pos_sim[2], min_height, 1.1*min_height, slope*min_height, 0)
   
-  def custom_deviation_penalty(self):
+  def custom_deviation_penalty(self, scaling):
     env = self._env
     robot = env.robot
     sim_model = robot.quadruped
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
-    return np.exp(- 30 * root_vel_sim[1]*root_vel_sim[1])
-
+    return np.exp(- scaling * root_vel_sim[1]*root_vel_sim[1])
 
 
   def _calc_reward_pose(self):

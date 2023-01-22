@@ -17,7 +17,7 @@ import gym
 import numpy as np
 
 from stable_baselines.common.vec_env import VecEnv
-from motion_imitation.envs.env_wrappers.imitation_task import VEL_EN_POS
+from motion_imitation.envs.env_wrappers.imitation_task import SUBREWARD_WEIGHTS
 
 def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, callback=None):
     """
@@ -55,7 +55,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
     current_it_len = 0  # len of current iteration
     current_ep_len = 0 # len of current episode
     cur_ep_true_ret = 0
-    cur_ep_ret_portion = np.zeros(len(VEL_EN_POS))
+    cur_ep_ret_portion = np.zeros(len(SUBREWARD_WEIGHTS))
     ep_true_rets = []
     ep_rets = []  # returns of completed episodes in this segment
     ep_lens = []  # Episode lengths
@@ -193,7 +193,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
             cur_ep_ret = 0
             cur_ep_true_ret = 0
             current_ep_len = 0
-            cur_ep_ret_portion = np.zeros(len(VEL_EN_POS))
+            cur_ep_ret_portion = np.zeros(len(SUBREWARD_WEIGHTS))
             if not isinstance(env, VecEnv):
                 observation = env.reset()
 
