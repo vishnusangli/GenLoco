@@ -49,8 +49,8 @@ ENERGY_EXP_SCALE = 5e-4
 POSE_SCALING=4
 
 ### HEIGHT ### (Tolerance)
-WALKING_MIN_HEIGHT=0.40
-HEIGHT_SLOPE = 1
+WALKING_MIN_HEIGHT=0.42
+HEIGHT_SLOPE = 0.3
 
 ### DEVIATION ### (exp)
 DEVIATION_SCALING=30
@@ -407,6 +407,7 @@ class ImitationTask(object):
     pyb = env._pybullet_client
     root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
     env.robot.quadruped)
+    print(root_pos_sim[2])
     return my_tolerance(root_pos_sim[2], min_height, 1.25*min_height, slope*min_height, 0)
   
   def custom_deviation_penalty(self, scaling):
