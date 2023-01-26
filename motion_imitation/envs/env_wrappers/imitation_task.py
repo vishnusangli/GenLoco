@@ -56,7 +56,7 @@ HEIGHT_SLOPE = 1
 DEVIATION_SCALING=30
 
 ### JOINT ANGLES ### 
-ANGLE_SCALING=8e-2
+ANGLE_SCALING=2e-1
 
 
 def linear_sigmoid(x, val_at_1):
