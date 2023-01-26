@@ -39,17 +39,17 @@ from pybullet_utils import transformations
 SUBREWARD_WEIGHTS = np.array([0.6, 0.2, 0.1, 0.05, 0.05])
 
 ### Loco ### (Tolerance)
-TARGET_VELOCITY = 0.6
+TARGET_VELOCITY = 0.85
 LOCO_SLOPE = 1
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 5e-3
+ENERGY_EXP_SCALE = 5e-4
 
 ### POSE ### (exp)
 POSE_SCALING=4
 
 ### HEIGHT ### (Tolerance)
-WALKING_MIN_HEIGHT=0.42
+WALKING_MIN_HEIGHT=0.40
 HEIGHT_SLOPE = 1
 
 ### DEVIATION ### (exp)
