@@ -36,7 +36,7 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation
-SUBREWARD_WEIGHTS = np.array([0.6, 0.2, 0.1, 0.05, 0.05])
+SUBREWARD_WEIGHTS = np.array([0.55, 0.2, 0.1, 0.05, 0.05, 0.05])
 
 ### Loco ### (Tolerance)
 TARGET_VELOCITY = 0.85
@@ -54,6 +54,9 @@ HEIGHT_SLOPE = 1
 
 ### DEVIATION ### (exp)
 DEVIATION_SCALING=30
+
+### JOINT ANGLES ### 
+ANGLE_SCALING=8e-2
 
 
 def linear_sigmoid(x, val_at_1):
@@ -346,12 +349,13 @@ class ImitationTask(object):
     pose_reward = self.custom_pose_reward(POSE_SCALING)
     height_reward = self.custom_height_reward(WALKING_MIN_HEIGHT, HEIGHT_SLOPE)
     deviation_penalty = self.custom_deviation_penalty(DEVIATION_SCALING)
+    angle_penalty = self.custom_joint_angle_penalty(ANGLE_SCALING)
 
-    rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty])
+    rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty, angle_penalty])
     reward = np.dot(rew, SUBREWARD_WEIGHTS)
 
     if self._visualize:
-      print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f}]--> {reward:3.2f}")
+      print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f} {angle_penalty:3.2f}]--> {reward:3.2f}")
 
     self._env.aggregate_returns = rew
     return reward * self._weight
@@ -412,6 +416,14 @@ class ImitationTask(object):
     pyb = env._pybullet_client
     root_vel_sim, root_ang_vel_sim = pyb.getBaseVelocity(sim_model)
     return np.exp(- scaling * root_vel_sim[1]*root_vel_sim[1])
+
+  def custom_joint_angle_penalty(self, scaling):
+    env = self._env
+    robot = env.robot
+    motor_angles = np.array([state[0] for state in robot._joint_states])
+    init_angles= robot.GetDefaultInitJointPose()
+    delta = np.sum(np.abs(motor_angles - init_angles))
+    return np.exp(-scaling * delta)
 
 
   def _load_ref_motions(self, filenames):
