@@ -43,7 +43,7 @@ TARGET_VELOCITY = 0.85
 LOCO_SLOPE = 0.5
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 5e-3
+ENERGY_EXP_SCALE = 2e-3
 
 ### POSE ### (exp)
 POSE_SCALING=4
