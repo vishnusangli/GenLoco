@@ -36,11 +36,11 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation, joint angle
-SUBREWARD_WEIGHTS = np.array([0.45, 0.1, 0.1, 0.1, 0.05, 0.2])
+SUBREWARD_WEIGHTS = np.array([0.55, 0.1, 0.15, 0.1, 0.05, 0.05])
 
 ### Loco ### (Tolerance)
 TARGET_VELOCITY = 0.85
-LOCO_SLOPE = 0.5
+LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
 ENERGY_EXP_SCALE = 2e-3
