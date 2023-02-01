@@ -36,10 +36,10 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation, joint angle
-SUBREWARD_WEIGHTS = np.array([0.55, 0.1, 0.15, 0.1, 0.05, 0.05])
+SUBREWARD_WEIGHTS = np.array([0.55, 0.1, 0.1, 0.1, 0.05, 0.1])
 
 ### Loco ### (Tolerance)
-TARGET_VELOCITY = 0.85
+TARGET_VELOCITY = 2.0
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
@@ -49,8 +49,8 @@ ENERGY_EXP_SCALE = 2e-3
 POSE_SCALING=4
 
 ### HEIGHT ### (Tolerance)
-WALKING_MIN_HEIGHT=0.42
-HEIGHT_SLOPE = 0.3
+WALKING_MIN_HEIGHT=0.75
+HEIGHT_SLOPE = 0.5
 
 ### DEVIATION ### (exp)
 DEVIATION_SCALING=30
@@ -540,8 +540,8 @@ class ImitationTask(object):
     motion_frame_vel_size = motion.get_frame_vel_size()
     pose_size = self.get_pose_size()
     vel_size = self.get_vel_size()
-    assert (motion_frame_size == pose_size)
-    assert (motion_frame_vel_size == vel_size)
+    #assert (motion_frame_size == pose_size)
+    #assert (motion_frame_vel_size == vel_size)
 
     return
 

@@ -332,7 +332,7 @@ class LocomotionGymEnv(gym.Env):
       if hasattr(self._task, '_ref_model') and self._task._ref_model:
         self._pybullet_client.changeVisualShape(self._task._ref_model, -1, rgbaColor=ref_col)
         for l in range (self._pybullet_client.getNumJoints(self._task._ref_model)):
-        	self._pybullet_client.changeVisualShape(self._task._ref_model, l, rgbaColor=ref_col)
+          self._pybullet_client.changeVisualShape(self._task._ref_model, l, rgbaColor=ref_col)
     
       delay = self._pybullet_client.readUserDebugParameter(self._delay_id)
       if (delay>0):

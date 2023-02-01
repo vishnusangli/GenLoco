@@ -91,18 +91,18 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   sim_params.motor_control_mode = robot_config.MotorControlMode.POSITION
 
   gym_config = locomotion_gym_config.LocomotionGymConfig(simulation_parameters=sim_params)
-
+  print(robot_class)
   if enable_phase_only:
     sensors = [
-      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.MotorAngleSensor(num_motors=base_robot.NUM_MOTORS), num_history=15),
+      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.MotorAngleSensor(num_motors=robot_class.NUM_MOTORS), num_history=15),
       sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.IMUSensor(channels=['R', 'P', 'Y', 'dR', 'dP', 'dY']), num_history=15),
-      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=environment_sensors.LastActionSensor(num_actions=base_robot.NUM_MOTORS), num_history=15)
+      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=environment_sensors.LastActionSensor(num_actions=robot_class.NUM_MOTORS), num_history=15)
   ]
   else:
     sensors = [
-      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.MotorAngleSensor(num_motors=base_robot.NUM_MOTORS), num_history=15),
+      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.MotorAngleSensor(num_motors=robot_class.NUM_MOTORS), num_history=15),
       sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.IMUSensor(), num_history=15),
-      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=environment_sensors.LastActionSensor(num_actions=base_robot.NUM_MOTORS), num_history=15)
+      sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=environment_sensors.LastActionSensor(num_actions=robot_class.NUM_MOTORS), num_history=15)
   ]
   # prevent initializing from reference motion when testing, 
   # as we do not provide robot-specific reference motion.
@@ -134,7 +134,7 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   randomizers = []
   if enable_randomizer:
     randomizer = controllable_env_randomizer_from_config.ControllableEnvRandomizerFromConfig(verbose=False)
-    randomizers.append(randomizer)
+    #randomizers.append(randomizer)
 
   if enable_randomized_robot:
     env = randomized_gym_env.RandomizedGymEnv(gym_config=gym_config, robot_class=robot_class,

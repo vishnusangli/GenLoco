@@ -25,7 +25,7 @@ import numpy as np
 
 from motion_imitation.robots import robot_config
 
-NUM_MOTORS = 12
+NUM_MOTORS = 14
 
 MOTOR_COMMAND_DIMENSION = 5
 
@@ -57,8 +57,8 @@ class LaikagoMotorModel(object):
                motor_control_mode=robot_config.MotorControlMode.POSITION):
     self._kp = kp
     self._kd = kd
-    self._kp_ratio = [1.0] * 12
-    self._kd_ratio = [1.0] * 12
+    self._kp_ratio = [1.0] * NUM_MOTORS
+    self._kd_ratio = [1.0] * NUM_MOTORS
 
     self._torque_limits = torque_limits
     if torque_limits is not None:
@@ -169,7 +169,6 @@ class LaikagoMotorModel(object):
     else:
       print("Undefined motor_control_mode=",motor_control_mode)
       exit()
-
     kd, kp = np.array(self._kd_ratio) * kd, np.array(self._kp_ratio) * kp
 
     motor_torques = -1 * (kp * (motor_angle - desired_motor_angles)) - kd * (

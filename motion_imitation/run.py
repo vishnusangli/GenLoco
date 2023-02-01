@@ -31,7 +31,7 @@ import time
 from motion_imitation.envs import env_builder as env_builder
 from motion_imitation.learning import imitation_policies as imitation_policies
 from motion_imitation.learning import ppo_imitation as ppo_imitation
-from motion_imitation.robots import anymal_b_simple, anymal_c_simple,base_robot,mini_cheetah,go1,aliengo,spot,spotmicro,siriusmid_belt
+from motion_imitation.robots import anymal_b_simple, anymal_c_simple,base_robot,mini_cheetah,go1,aliengo,spot,spotmicro,siriusmid_belt, cassie
 from motion_imitation.robots import a1
 from motion_imitation.real_a1 import a1_robot_real
 from stable_baselines.common.callbacks import CheckpointCallback
@@ -54,6 +54,7 @@ robot_classes = {
     "spotmicro":spotmicro.SpotMicro,
     "real_a1":a1_robot_real.A1Robot,
     # add new robot class here
+    "cassie": cassie.Cassie
 }
 
 def set_rand_seed(seed=None):
@@ -129,6 +130,7 @@ def test(model, env, num_procs, num_episodes=None):
 
   o = env.reset()
   while episode_count < num_local_episodes:
+    print(episode_count)
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
     curr_return += r
