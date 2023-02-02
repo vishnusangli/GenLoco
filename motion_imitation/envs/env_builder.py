@@ -91,7 +91,6 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
   sim_params.motor_control_mode = robot_config.MotorControlMode.POSITION
 
   gym_config = locomotion_gym_config.LocomotionGymConfig(simulation_parameters=sim_params)
-  print(robot_class)
   if enable_phase_only:
     sensors = [
       sensor_wrappers.HistoricSensorWrapper(wrapped_sensor=robot_sensors.MotorAngleSensor(num_motors=robot_class.NUM_MOTORS), num_history=15),

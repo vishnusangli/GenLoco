@@ -50,13 +50,13 @@ POSE_SCALING=4
 
 ### HEIGHT ### (Tolerance)
 WALKING_MIN_HEIGHT=0.75
-HEIGHT_SLOPE = 0.5
+HEIGHT_SLOPE = 0.2
 
 ### DEVIATION ### (exp)
 DEVIATION_SCALING=30
 
 ### JOINT ANGLES ### 
-ANGLE_SCALING=3.5e-1
+ANGLE_SCALING=6e-1
 
 
 def linear_sigmoid(x, val_at_1):
@@ -374,7 +374,7 @@ class ImitationTask(object):
     root_vel_sim = np.array(root_vel_sim)
     tar_dir_speed = root_vel_sim[0]
 
-    rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0)
+    rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0.4)
     return rewards
 
   def custom_energy_penalty(self, scaling):
