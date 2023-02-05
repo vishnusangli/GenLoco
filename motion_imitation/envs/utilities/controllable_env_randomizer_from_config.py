@@ -44,6 +44,8 @@ class ControllableEnvRandomizerFromConfig(
   def __init__(self,
                config=None,
                verbose=True,
+               num_legs=4,
+               num_motors=12,
                param_bounds=(-1., 1.),
                randomization_seed=None):
     if config is None:
@@ -62,6 +64,8 @@ class ControllableEnvRandomizerFromConfig(
     self._suspend_randomization = False
     self._verbose = verbose
     self._rejection_param_range = {}
+    self._num_legs=num_legs
+    self._num_motors = num_motors
 
     self._np_random = np.random.RandomState()
 
@@ -195,8 +199,8 @@ class ControllableEnvRandomizerFromConfig(
     return func_dict
 
   def _randomize_pd_gains(self, minitaur, lower_bound, upper_bound):
-     kp_ratio = self._np_random.uniform([lower_bound]*12, [upper_bound]*12)
-     kd_ratio = self._np_random.uniform([lower_bound]*12, [upper_bound]*12)
+     kp_ratio = self._np_random.uniform([lower_bound]*self._num_motors, [upper_bound]*self._num_motors)
+     kd_ratio = self._np_random.uniform([lower_bound]*self._num_motors, [upper_bound]*self._num_motors)
 
      minitaur._motor_model.set_pd_ratios(kp_ratio=kp_ratio, kd_ratio=kd_ratio)
 
@@ -529,10 +533,10 @@ class ControllableEnvRandomizerFromConfig(
                                lower_bound,
                                upper_bound,
                                parameters=None):
-    motor_per_leg = int(minitaur.num_motors / NUM_LEGS)
+    motor_per_leg = int(minitaur.num_motors / self._num_legs)
     if parameters is None:
       # First choose which leg to weaken
-      leg_to_weaken = self._np_random.randint(NUM_LEGS)
+      leg_to_weaken = self._np_random.randint(self._num_legs)
 
       # Choose what ratio to randomize
       normalized_ratio = self._np_random.uniform(self._param_bounds[0],
@@ -562,7 +566,7 @@ class ControllableEnvRandomizerFromConfig(
                                       lower_bound,
                                       upper_bound,
                                       parameters=None):
-    motor_per_leg = int(minitaur.num_motors / NUM_LEGS)
+    motor_per_leg = int(minitaur.num_motors / self._num_legs)
     leg_to_weaken = 0
     if parameters is None:
       # Choose what ratio to randomize

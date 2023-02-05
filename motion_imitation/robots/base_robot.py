@@ -131,6 +131,7 @@ def MapToMinusPiToPi(angles):
 
 class Base_robot(object):
   """A simulation for the Base_robot robot."""
+  NUM_LEGS=NUM_LEGS
   NUM_MOTORS = NUM_MOTORS
   MPC_BODY_MASS = 215/9.8
   MPC_BODY_INERTIA = (0.07335, 0, 0, 0, 0.25068, 0, 0, 0, 0.25447)
@@ -275,6 +276,7 @@ class Base_robot(object):
         kp=motor_kp,
         kd=motor_kd,
         torque_limits=self._motor_torque_limits,
+        num_motors=self.num_motors,
         motor_control_mode=motor_control_mode)
 
     self.time_step = time_step

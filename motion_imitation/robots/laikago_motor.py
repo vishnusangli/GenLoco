@@ -25,8 +25,6 @@ import numpy as np
 
 from motion_imitation.robots import robot_config
 
-NUM_MOTORS = 14
-
 MOTOR_COMMAND_DIMENSION = 5
 
 # These values represent the indices of each field in the motor command tuple
@@ -54,20 +52,22 @@ class LaikagoMotorModel(object):
                kp=60,
                kd=1,
                torque_limits=None,
+               num_motors=12,
                motor_control_mode=robot_config.MotorControlMode.POSITION):
     self._kp = kp
     self._kd = kd
-    self._kp_ratio = [1.0] * NUM_MOTORS
-    self._kd_ratio = [1.0] * NUM_MOTORS
+    self._num_motors=num_motors
+    self._kp_ratio = [1.0] * self._num_motors
+    self._kd_ratio = [1.0] * self._num_motors
 
     self._torque_limits = torque_limits
     if torque_limits is not None:
       if isinstance(torque_limits, (collections.Sequence, np.ndarray)):
         self._torque_limits = np.asarray(torque_limits)
       else:
-        self._torque_limits = np.full(NUM_MOTORS, torque_limits)
+        self._torque_limits = np.full(self._num_motors, torque_limits)
     self._motor_control_mode = motor_control_mode
-    self._strength_ratios = np.full(NUM_MOTORS, 1)
+    self._strength_ratios = np.full(self._num_motors, 1)
 
   def set_strength_ratios(self, ratios):
     """Set the strength of each motors relative to the default value.
@@ -141,7 +141,7 @@ class LaikagoMotorModel(object):
 
     # No processing for motor torques
     if motor_control_mode is robot_config.MotorControlMode.TORQUE:
-      assert len(motor_commands) == NUM_MOTORS
+      assert len(motor_commands) == self._num_motors
       motor_torques = self._strength_ratios * motor_commands
       return motor_torques, motor_torques
 
@@ -149,16 +149,16 @@ class LaikagoMotorModel(object):
     desired_motor_velocities = None
     kp = None
     kd = None
-    additional_torques = np.full(NUM_MOTORS, 0)
+    additional_torques = np.full(self._num_motors, 0)
     if motor_control_mode is robot_config.MotorControlMode.POSITION:
-      assert len(motor_commands) == NUM_MOTORS
+      assert len(motor_commands) == self._num_motors
       kp = self._kp
       kd = self._kd
       desired_motor_angles = motor_commands
-      desired_motor_velocities = np.full(NUM_MOTORS, 0)
+      desired_motor_velocities = np.full(self._num_motors, 0)
     elif motor_control_mode is robot_config.MotorControlMode.HYBRID:
       # The input should be a 60 dimension vector
-      assert len(motor_commands) == MOTOR_COMMAND_DIMENSION * NUM_MOTORS
+      assert len(motor_commands) == MOTOR_COMMAND_DIMENSION * self._num_motors
       kp = motor_commands[POSITION_GAIN_INDEX::MOTOR_COMMAND_DIMENSION]
       kd = motor_commands[VELOCITY_GAIN_INDEX::MOTOR_COMMAND_DIMENSION]
       desired_motor_angles = motor_commands[

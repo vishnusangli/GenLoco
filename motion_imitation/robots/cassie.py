@@ -47,7 +47,9 @@ PI = math.pi
 
 # Bases on the readings from 's default pose.
 INIT_MOTOR_ANGLES = np.array([0,0,1.0204,-1.97,-0.084,2.06,-1.9,0,0,1.0204,-1.97,-0.084,2.06,-1.9])
+#self.action_bounds = np.array([[-0.2618, -0.3927, -0.8727, -2.8623, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -2.4435],                              [0.3927, 0.3927, 1.3963, -0.6458, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, -0.5236]])
 MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
+#4, 5, 11, 12
 MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
 
 ACTION_CONFIG = [
@@ -64,6 +66,7 @@ motor_kd = []
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
+	NUM_LEGS=NUM_LEGS
 	NUM_MOTORS = NUM_MOTORS
 	ACTION_CONFIG = ACTION_CONFIG
 	def __init__(self,

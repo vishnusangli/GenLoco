@@ -132,8 +132,8 @@ def build_imitation_env(motion_files, num_parallel_envs, mode,
 
   randomizers = []
   if enable_randomizer:
-    randomizer = controllable_env_randomizer_from_config.ControllableEnvRandomizerFromConfig(verbose=False)
-    #randomizers.append(randomizer)
+    randomizer = controllable_env_randomizer_from_config.ControllableEnvRandomizerFromConfig(verbose=False, num_motors=robot_class.NUM_MOTORS, num_legs=robot_class.NUM_LEGS)
+    randomizers.append(randomizer)
 
   if enable_randomized_robot:
     env = randomized_gym_env.RandomizedGymEnv(gym_config=gym_config, robot_class=robot_class,
