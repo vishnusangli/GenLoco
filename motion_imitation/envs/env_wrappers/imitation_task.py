@@ -233,22 +233,8 @@ class ImitationTask(object):
     if self._default_pose is None or self._env.hard_reset:
       self._default_pose = self._record_default_pose()
 
-    rand_val = self._rand_uniform(0.0, 1.0)
-    ref_state_init = rand_val < self._ref_state_init_prob
-
     self._curr_episode_warmup = False
-    if not ref_state_init and self._enable_warmup():
-      self._curr_episode_warmup = True
-
     self._reset_ref_motion()
-
-    perturb_state = False
-    if self._enable_perturb_init_state():
-      rand_val = self._rand_uniform(0.0, 1.0)
-      perturb_state = rand_val < self._perturb_init_state_prob
-
-    self._sync_sim_model(perturb_state)
-
     return
 
   def update(self, env):
@@ -534,14 +520,6 @@ class ImitationTask(object):
       self._joint_pose_size[j] = j_pose_size
       self._joint_vel_idx[j] = j_vel_idx
       self._joint_vel_size[j] = j_vel_size
-
-    motion = self.get_active_motion()
-    motion_frame_size = motion.get_frame_size()
-    motion_frame_vel_size = motion.get_frame_vel_size()
-    pose_size = self.get_pose_size()
-    vel_size = self.get_vel_size()
-    #assert (motion_frame_size == pose_size)
-    #assert (motion_frame_vel_size == vel_size)
 
     return
 

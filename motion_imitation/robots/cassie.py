@@ -13,24 +13,36 @@ _LINK_A_FIELD_NUMBER = 3
 MAX_MOTOR_ANGLE_CHANGE_PER_STEP = 0.3
 URDF_FILENAME = "robot_descriptions/cassie_description/urdf/cassie_collide.urdf"
 
-NUM_MOTORS = 14
+NUM_MOTORS = 10
 NUM_LEGS = 2
-DOFS_PER_LEG = 7
-
-MOTOR_NAMES = ['hip_abduction_left', 
-	       'hip_rotation_left', 
-		   'hip_flexion_left', 
-		   'knee_joint_left', 
-		   'knee_to_shin_left', 
-		   'ankle_joint_left', 
-		   'toe_joint_left', 
-		   'hip_abduction_right', 
-		   'hip_rotation_right', 
-		   'hip_flexion_right', 
-		   'knee_joint_right', 
-		   'knee_to_shin_right', 
-		   'ankle_joint_right', 
-		   'toe_joint_right']
+DOFS_PER_LEG = 5
+indices = [0, 1, 2, 3, 6, 7, 8, 9, 10, 13]
+MOTOR_NAMES = ['hip_abduction_left', #0
+	       'hip_rotation_left', #1 
+		   'hip_flexion_left', #2
+		   'knee_joint_left', #3
+		   'toe_joint_left', #4
+		   'hip_abduction_right', #5 
+		   'hip_rotation_right', #6
+		   'hip_flexion_right', #7
+		   'knee_joint_right', #8
+		   'toe_joint_right', #9
+		   ]
+FULL_MOTOR_NAMES = ['hip_abduction_left', #0
+	       'hip_rotation_left', #1 
+		   'hip_flexion_left', #2
+		   'knee_joint_left', #3
+		   'toe_joint_left', #4
+		   'hip_abduction_right', #5 
+		   'hip_rotation_right', #6
+		   'hip_flexion_right', #7
+		   'knee_joint_right', #8
+		   'toe_joint_right', #9
+		   'knee_to_shin_left', #give 0 
+		   'ankle_joint_left', #3
+		   'knee_to_shin_right', #give 0 
+		   'ankle_joint_right', #8
+		   ]
 
 HIP_NAME_PATTERN = re.compile(r"hip_\w+")
 UPPER_NAME_PATTERN = re.compile(r"knee_\w+")
@@ -38,31 +50,44 @@ LOWER_NAME_PATTERN = re.compile(r"ankle_\w+")
 TOE_NAME_PATTERN = re.compile(r"toe_\w*")
 IMU_NAME_PATTERN = re.compile(r"imu\d*")
 
-_DEFAULT_TORQUE_LIMITS = [50] * NUM_MOTORS
+_DEFAULT_TORQUE_LIMITS = [30] * NUM_MOTORS
 INIT_POSITION = [0, 0, 0.8]
-JOINT_DIRECTIONS = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+JOINT_DIRECTIONS = np.array([-1]*NUM_MOTORS)
 
 JOINT_OFFSETS = np.array([0.0] *NUM_MOTORS)
-PI = math.pi
 
 # Bases on the readings from 's default pose.
-INIT_MOTOR_ANGLES = np.array([0,0,1.0204,-1.97,-0.084,2.06,-1.9,0,0,1.0204,-1.97,-0.084,2.06,-1.9])
-#self.action_bounds = np.array([[-0.2618, -0.3927, -0.8727, -2.8623, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -2.4435],                              [0.3927, 0.3927, 1.3963, -0.6458, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, -0.5236]])
-MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
-#4, 5, 11, 12
-MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
+INIT_MOTOR_ANGLES = np.array([0, 0, 1.0204, -1.97, -1.9, 0, 0, 1.0204, -1.97, -1.9])
+FULL_INIT_MOTOR_ANGLES = np.array([0,0,1.0204,-1.97,-1.9,0,0,1.0204,-1.97,-1.9, -0.084,2.06, -0.084,2.06])
+"""
+10:
+np.array([-0.2618, -0.3927, -0.8727, -2.8623, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -2.4435])
+np.array([0.3927, 0.3927, 1.3963, -0.6458, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, -0.5236])
+
+14:
+np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
+np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
+"""
+MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -2.4435])
+MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, -0.5236])
+
+
+def ImputePDAangles(pose, a=0.0, b=lambda x: np.radians(13)-x):
+	altered_pose = np.concatenate([pose[:4], [a, b(pose[4])], pose[4:9], [a, b(pose[8])], pose[9:]])
+	return altered_pose
+def ReducePDAngles(pose):
+	altered_pose = pose[indices]
+	return altered_pose
 
 ACTION_CONFIG = [
-      locomotion_gym_config.ScalarField(name=MOTOR_NAMES[i],
+      locomotion_gym_config.ScalarField(MOTOR_NAMES,
                                         upper_bound=MOTOR_UPPER_BOUNDS[i],
-                                        lower_bound=-MOTOR_LOWER_BOUNDS[i]) 
-										for i in range(len(MOTOR_NAMES))
+                                        lower_bound=MOTOR_LOWER_BOUNDS[i]) 
+										for i in range(NUM_MOTORS)
 										]
-P_GAIN = 100.0
-D_GAIN = 1.
 
-motor_kp = []
-motor_kd = []
+pGain = np.array([400, 200, 200, 500, 20, 400, 200, 200, 500, 20]) 
+dGain = np.array([4, 4, 10, 20, 4, 4, 4, 10, 20, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
@@ -88,8 +113,8 @@ class Cassie(base_robot.Base_robot):
 		self._urdf_filename = urdf_filename
 		self._allow_knee_contact = allow_knee_contact
 		self._enable_clip_motor_commands = enable_clip_motor_commands
-		motor_kp = [P_GAIN] * NUM_MOTORS
-		motor_kd = [D_GAIN] *NUM_MOTORS
+		motor_kp =  [100]*NUM_MOTORS #pGain
+		motor_kd = [1]*NUM_MOTORS #dGain
 		super(Cassie, self).__init__(
 			pybullet_client=pybullet_client,
 			num_motors=NUM_MOTORS,
@@ -111,6 +136,7 @@ class Cassie(base_robot.Base_robot):
 			reset_time=reset_time,
 			allow_knee_contact=allow_knee_contact,
 			enable_clip_motor_commands=enable_clip_motor_commands)
+		self._BuildFullMotorIdList()
 
 	def GetURDFFile(self):
 		return self._urdf_filename
@@ -125,8 +151,8 @@ class Cassie(base_robot.Base_robot):
 				controlMode=self._pybullet_client.VELOCITY_CONTROL,
 				targetVelocity=0,
 				force=0)
-		angles = self.GetDefaultInitJointPose()
-		for name, i in zip(MOTOR_NAMES, range(len(MOTOR_NAMES))):
+		angles = FULL_INIT_MOTOR_ANGLES
+		for name, i in zip(FULL_MOTOR_NAMES, range(len(FULL_MOTOR_NAMES))):
 			angle = angles[i]
 			self._pybullet_client.resetJointState(
 				self.quadruped, self._joint_name_to_id[name], angle, targetVelocity=0)
@@ -235,7 +261,7 @@ class Cassie(base_robot.Base_robot):
 
 	def GetFootContacts(self): # check the id
 		all_contacts = self._pybullet_client.getContactPoints(bodyA=self.quadruped)
-		contacts = [False]
+		contacts = [False, False]
 		for contact in all_contacts:
 			# Ignore self contacts
 			if contact[_BODY_B_FIELD_NUMBER] == self.quadruped:
@@ -251,9 +277,65 @@ class Cassie(base_robot.Base_robot):
 	def GetFootLinkIDs(self):
 		"""Get list of IDs for all foot links."""
 		return self._foot_link_ids
-
-	def GetInitMotorAngles(self):
-		return INIT_MOTOR_ANGLES
 	
 	def GetActionLimit(self):
 		return np.array([2] * NUM_MOTORS)
+	
+	def _BuildFullMotorIdList(self):
+		self._full_motor_id_list = [
+			self._joint_name_to_id[motor_name]
+			for motor_name in FULL_MOTOR_NAMES
+		]
+	
+	def GetTrueMotorAngles(self):
+		"""Gets the eight motor angles at the current moment, mapped to [-pi, pi].
+
+		Returns:
+		Motor angles, mapped to [-pi, pi].
+		"""
+		motor_angles = [state[0] for state in self._joint_states]
+		motor_angles = np.multiply(
+			np.asarray(motor_angles) - np.asarray(JOINT_OFFSETS),
+			JOINT_DIRECTIONS)
+		return motor_angles
+	
+	def GetTrueMotorVelocities(self):
+		"""Get the velocity of all eight motors.
+
+		Returns:
+		Velocities of all eight motors.
+		"""
+		motor_velocities = [state[1] for state in self._joint_states]
+
+		motor_velocities = np.multiply(motor_velocities, JOINT_DIRECTIONS)
+		return motor_velocities
+
+	def ReceiveObservation(self):
+		"""Receive the observation from sensors.
+
+		This function is called once per step. The observations are only updated
+		when this function is called.
+		"""
+		self._joint_states = self._pybullet_client.getJointStates(
+			self.quadruped, self._motor_id_list)
+		self._base_position, orientation = (
+			self._pybullet_client.getBasePositionAndOrientation(self.quadruped))
+		# Computes the relative orientation relative to the robot's
+		# initial_orientation.
+		_, self._base_orientation = self._pybullet_client.multiplyTransforms(
+			positionA=[0, 0, 0],
+			orientationA=orientation,
+			positionB=[0, 0, 0],
+			orientationB=self._init_orientation_inv)
+		self._observation_history.appendleft(self.GetTrueObservation())
+		self._control_observation = self._GetControlObservation()
+		self.last_state_time = self._state_action_counter * self.time_step
+
+	def _SetMotorTorqueByIds(self, motor_ids, torques):
+		new_torques = np.concatenate([torques[:4], [0.0, -torques[3]], torques[4: 9], 
+									[0., -torques[8]], torques[9:]])
+		self._pybullet_client.setJointMotorControlArray(
+			bodyIndex=self.quadruped,
+			jointIndices=self._full_motor_id_list,
+			controlMode=self._pybullet_client.TORQUE_CONTROL,
+			forces=new_torques)
