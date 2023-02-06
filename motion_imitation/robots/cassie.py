@@ -52,8 +52,8 @@ IMU_NAME_PATTERN = re.compile(r"imu\d*")
 
 _DEFAULT_TORQUE_LIMITS = [30] * NUM_MOTORS
 INIT_POSITION = [0, 0, 0.8]
-JOINT_DIRECTIONS = np.array([-1]*NUM_MOTORS)
-
+JOINT_DIRECTIONS = np.array([1, -1, 1, 1, 1, 1, -1, 1, 1, 1])
+#[1, -1, 1, 1, 1, 1, -1, 1, 1, 1]
 JOINT_OFFSETS = np.array([0.0] *NUM_MOTORS)
 
 # Bases on the readings from 's default pose.
