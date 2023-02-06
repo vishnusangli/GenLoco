@@ -36,14 +36,14 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation, joint angle
-SUBREWARD_WEIGHTS = np.array([0.55, 0.1, 0.1, 0.1, 0.05, 0.1])
+SUBREWARD_WEIGHTS = np.array([0.5, 0.1, 0.1, 0.15, 0.05, 0.1])
 
 ### Loco ### (Tolerance)
 TARGET_VELOCITY = 2.0
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 2e-3
+ENERGY_EXP_SCALE = 5e-3
 
 ### POSE ### (exp)
 POSE_SCALING=4
@@ -56,7 +56,7 @@ HEIGHT_SLOPE = 0.2
 DEVIATION_SCALING=30
 
 ### JOINT ANGLES ### 
-ANGLE_SCALING=6e-1
+ANGLE_SCALING=3e-1
 
 
 def linear_sigmoid(x, val_at_1):

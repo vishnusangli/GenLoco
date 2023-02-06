@@ -13,9 +13,9 @@ _LINK_A_FIELD_NUMBER = 3
 MAX_MOTOR_ANGLE_CHANGE_PER_STEP = 0.3
 URDF_FILENAME = "robot_descriptions/cassie_description/urdf/cassie_collide.urdf"
 
-NUM_MOTORS = 10
+NUM_MOTORS = 14
 NUM_LEGS = 2
-DOFS_PER_LEG = 5
+DOFS_PER_LEG = 7
 indices = [0, 1, 2, 3, 6, 7, 8, 9, 10, 13]
 MOTOR_NAMES = ['hip_abduction_left', #0
 	       'hip_rotation_left', #1 
@@ -32,16 +32,16 @@ FULL_MOTOR_NAMES = ['hip_abduction_left', #0
 	       'hip_rotation_left', #1 
 		   'hip_flexion_left', #2
 		   'knee_joint_left', #3
+		   'knee_to_shin_left', #give 0 
+		   'ankle_joint_left', #3
 		   'toe_joint_left', #4
 		   'hip_abduction_right', #5 
 		   'hip_rotation_right', #6
 		   'hip_flexion_right', #7
 		   'knee_joint_right', #8
-		   'toe_joint_right', #9
-		   'knee_to_shin_left', #give 0 
-		   'ankle_joint_left', #3
 		   'knee_to_shin_right', #give 0 
 		   'ankle_joint_right', #8
+		   'toe_joint_right', #9
 		   ]
 
 HIP_NAME_PATTERN = re.compile(r"hip_\w+")
@@ -52,13 +52,16 @@ IMU_NAME_PATTERN = re.compile(r"imu\d*")
 
 _DEFAULT_TORQUE_LIMITS = [30] * NUM_MOTORS
 INIT_POSITION = [0, 0, 0.8]
-JOINT_DIRECTIONS = np.array([1, -1, 1, 1, 1, 1, -1, 1, 1, 1])
-#[1, -1, 1, 1, 1, 1, -1, 1, 1, 1]
+JOINT_DIRECTIONS = np.array([1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1])
+"""
+10: [1, -1, 1, 1, 1, 1, -1, 1, 1, 1]
+14: [1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1]
+"""
 JOINT_OFFSETS = np.array([0.0] *NUM_MOTORS)
 
 # Bases on the readings from 's default pose.
 INIT_MOTOR_ANGLES = np.array([0, 0, 1.0204, -1.97, -1.9, 0, 0, 1.0204, -1.97, -1.9])
-FULL_INIT_MOTOR_ANGLES = np.array([0,0,1.0204,-1.97,-1.9,0,0,1.0204,-1.97,-1.9, -0.084,2.06, -0.084,2.06])
+FULL_INIT_MOTOR_ANGLES = np.array([0,0,1.0204,-1.97, -0.084,2.06,-1.9,0,0,1.0204,-1.97, -0.084,2.06,-1.9])
 """
 10:
 np.array([-0.2618, -0.3927, -0.8727, -2.8623, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -2.4435])
@@ -68,8 +71,8 @@ np.array([0.3927, 0.3927, 1.3963, -0.6458, -0.5236, 0.2618, 0.3927, 1.3963, -0.6
 np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
 np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
 """
-MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -2.4435])
-MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, -0.5236])
+MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
+MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
 
 
 def ImputePDAangles(pose, a=0.0, b=lambda x: np.radians(13)-x):
@@ -86,8 +89,8 @@ ACTION_CONFIG = [
 										for i in range(NUM_MOTORS)
 										]
 
-pGain = np.array([400, 200, 200, 500, 20, 400, 200, 200, 500, 20]) 
-dGain = np.array([4, 4, 10, 20, 4, 4, 4, 10, 20, 4])
+pGain = np.array([400, 200, 200, 500, 200, 500, 20, 400, 200, 200, 500, 200, 500, 20]) 
+dGain = np.array([4, 4, 10, 20, 4, 20, 4, 4, 4, 10, 20, 4, 20, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
@@ -113,8 +116,8 @@ class Cassie(base_robot.Base_robot):
 		self._urdf_filename = urdf_filename
 		self._allow_knee_contact = allow_knee_contact
 		self._enable_clip_motor_commands = enable_clip_motor_commands
-		motor_kp =  [100]*NUM_MOTORS #pGain
-		motor_kd = [1]*NUM_MOTORS #dGain
+		motor_kp =  pGain
+		motor_kd = dGain
 		super(Cassie, self).__init__(
 			pybullet_client=pybullet_client,
 			num_motors=NUM_MOTORS,
@@ -216,7 +219,7 @@ class Cassie(base_robot.Base_robot):
 		return motor_commands
 		
 	def _GetMotorNames(self):
-		return MOTOR_NAMES
+		return FULL_MOTOR_NAMES
 
 	def _GetDefaultInitPosition(self):
 		return INIT_POSITION
@@ -227,11 +230,11 @@ class Cassie(base_robot.Base_robot):
 
 	def GetDefaultInitJointPose(self):
 		"""Get default initial joint pose."""
-		joint_pose = (INIT_MOTOR_ANGLES + JOINT_OFFSETS) * JOINT_DIRECTIONS
+		joint_pose = (FULL_INIT_MOTOR_ANGLES + JOINT_OFFSETS) * JOINT_DIRECTIONS
 		return joint_pose
 
 	def GetInitMotorAngles(self):
-		return INIT_MOTOR_ANGLES
+		return FULL_INIT_MOTOR_ANGLES
 
 	def _SettleDownForReset(self, default_motor_angles, reset_time):
 		"""Sets the default motor angles and waits for the robot to settle down.
@@ -250,7 +253,7 @@ class Cassie(base_robot.Base_robot):
 
 		for _ in range(500):
 			self._StepInternal(
-				INIT_MOTOR_ANGLES,
+				FULL_INIT_MOTOR_ANGLES,
 				motor_control_mode=robot_config.MotorControlMode.POSITION)
 		if default_motor_angles is not None:
 			num_steps_to_reset = int(reset_time / self.time_step)
@@ -332,10 +335,8 @@ class Cassie(base_robot.Base_robot):
 		self.last_state_time = self._state_action_counter * self.time_step
 
 	def _SetMotorTorqueByIds(self, motor_ids, torques):
-		new_torques = np.concatenate([torques[:4], [0.0, -torques[3]], torques[4: 9], 
-									[0., -torques[8]], torques[9:]])
 		self._pybullet_client.setJointMotorControlArray(
 			bodyIndex=self.quadruped,
 			jointIndices=self._full_motor_id_list,
 			controlMode=self._pybullet_client.TORQUE_CONTROL,
-			forces=new_torques)
+			forces=torques)
