@@ -95,8 +95,8 @@ ACTION_CONFIG = [
 										for i in range(NUM_MOTORS)
 										]
 
-pGain = np.array([400, 200, 200, 500, 800, 800, 20, 400, 200, 200, 500, 800, 800, 20]) 
-dGain = np.array([4, 4, 10, 20, 30, 30, 4, 4, 4, 10, 20, 30, 30, 4])
+pGain = np.array([400, 200, 200, 500, 500, 500, 20, 400, 200, 200, 500, 500, 500, 20]) 
+dGain = np.array([4, 4, 10, 20, 20, 20, 4, 4, 4, 10, 20, 20, 20, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
