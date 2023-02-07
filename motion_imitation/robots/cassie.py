@@ -8,6 +8,10 @@ from motion_imitation.robots import base_robot
 from motion_imitation.robots import robot_config
 from motion_imitation.envs import locomotion_gym_config
 
+# load urdf, check what are actuartor, are they 10 14?
+# if this is 14, check wether correct, get the joint space, note they are asm
+# if this is 10 -- modidfy urdf, go to point 1
+
 _BODY_B_FIELD_NUMBER = 2
 _LINK_A_FIELD_NUMBER = 3
 MAX_MOTOR_ANGLE_CHANGE_PER_STEP = 0.3
@@ -50,10 +54,12 @@ LOWER_NAME_PATTERN = re.compile(r"ankle_\w+")
 TOE_NAME_PATTERN = re.compile(r"toe_\w*")
 IMU_NAME_PATTERN = re.compile(r"imu\d*")
 
-_DEFAULT_TORQUE_LIMITS = [30] * NUM_MOTORS
+_DEFAULT_TORQUE_LIMITS = np.array([112.5, 112.5, 195.2, 195.2, 200, 200, 45, 112.5, 112.5, 195.2, 195.5, 200, 200, 45])
 INIT_POSITION = [0, 0, 0.8]
 JOINT_DIRECTIONS = np.array([1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1])
 """
+[112.5, 112.5, 195.2, 195.2, 200, 200, 45, 112.5, 112.5, 195.2, 195.5, 200, 200, 45]
+torque limits: 112.5;112.5;195.2;195.2;45
 10: [1, -1, 1, 1, 1, 1, -1, 1, 1, 1]
 14: [1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1]
 """
@@ -73,7 +79,7 @@ np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927,
 """
 MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
 MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
-
+MOTOR_ACTION_LIMITS = np.array([0.2618, 0.3927, 0.3759, 0.8923, 0.265 , 0.91  , 0.5435, 0.2618,  0.3927, 0.3759, 0.8923, 0.265 , 0.91  , 0.5435])
 
 def ImputePDAangles(pose, a=0.0, b=lambda x: np.radians(13)-x):
 	altered_pose = np.concatenate([pose[:4], [a, b(pose[4])], pose[4:9], [a, b(pose[8])], pose[9:]])
@@ -89,8 +95,8 @@ ACTION_CONFIG = [
 										for i in range(NUM_MOTORS)
 										]
 
-pGain = np.array([400, 200, 200, 500, 200, 500, 20, 400, 200, 200, 500, 200, 500, 20]) 
-dGain = np.array([4, 4, 10, 20, 4, 20, 4, 4, 4, 10, 20, 4, 20, 4])
+pGain = np.array([400, 200, 200, 500, 800, 800, 20, 400, 200, 200, 500, 800, 800, 20]) 
+dGain = np.array([4, 4, 10, 20, 30, 30, 4, 4, 4, 10, 20, 30, 30, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
@@ -173,14 +179,11 @@ class Cassie(base_robot.Base_robot):
 			joint_info = self.pybullet_client.getJointInfo(self.quadruped, i)
 			joint_name = joint_info[1].decode("UTF-8")
 			joint_id = self._joint_name_to_id[joint_name]
+			self._motor_link_ids.append(joint_id)
 			if HIP_NAME_PATTERN.match(joint_name):
 				self._hip_link_ids.append(joint_id)
-			elif UPPER_NAME_PATTERN.match(joint_name):
-				self._motor_link_ids.append(joint_id)
 			# We either treat the lower leg or the toe as the foot link, depending on
 			# the urdf version used.HIHIP_NAME_PATTERNP_NAME_PATTERN
-			elif LOWER_NAME_PATTERN.match(joint_name):
-				self._lower_link_ids.append(joint_id)
 			elif TOE_NAME_PATTERN.match(joint_name):
 				#assert self._urdf_filename == URDF_WITH_TOES
 				self._foot_link_ids.append(joint_id)
@@ -282,7 +285,7 @@ class Cassie(base_robot.Base_robot):
 		return self._foot_link_ids
 	
 	def GetActionLimit(self):
-		return np.array([2] * NUM_MOTORS)
+		return MOTOR_ACTION_LIMITS
 	
 	def _BuildFullMotorIdList(self):
 		self._full_motor_id_list = [

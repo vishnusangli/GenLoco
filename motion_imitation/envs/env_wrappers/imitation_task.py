@@ -36,20 +36,20 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation, joint angle
-SUBREWARD_WEIGHTS = np.array([0.5, 0.1, 0.1, 0.15, 0.05, 0.1])
+SUBREWARD_WEIGHTS = np.array([0.55, 0.1, 0.1, 0.5, 0.05, 0.1])
 
 ### Loco ### (Tolerance)
 TARGET_VELOCITY = 2.0
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 5e-3
+ENERGY_EXP_SCALE = 2e-4
 
 ### POSE ### (exp)
 POSE_SCALING=4
 
 ### HEIGHT ### (Tolerance)
-WALKING_MIN_HEIGHT=0.75
+WALKING_MIN_HEIGHT=0.67
 HEIGHT_SLOPE = 0.2
 
 ### DEVIATION ### (exp)
@@ -360,7 +360,7 @@ class ImitationTask(object):
     root_vel_sim = np.array(root_vel_sim)
     tar_dir_speed = root_vel_sim[0]
 
-    rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0.4)
+    rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0.)
     return rewards
 
   def custom_energy_penalty(self, scaling):
@@ -393,7 +393,7 @@ class ImitationTask(object):
     pyb = env._pybullet_client
     root_pos_sim, root_rot_sim = pyb.getBasePositionAndOrientation(
     env.robot.quadruped)
-    return my_tolerance(root_pos_sim[2], min_height, 1.25*min_height, slope*min_height, 0)
+    return my_tolerance(root_pos_sim[2], min_height, 2*min_height, slope*min_height, 0)
   
   def custom_deviation_penalty(self, scaling):
     env = self._env

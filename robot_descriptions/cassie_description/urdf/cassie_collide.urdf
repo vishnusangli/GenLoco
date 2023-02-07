@@ -431,14 +431,14 @@
     <axis xyz="0 0 1"/>
     <parent link="left_knee"/>
     <child link="left_shin"/>
-    <limit effort="0" lower="-0.349" upper="0.349" velocity="100"/>
+    <limit effort="12.2" lower="-0.349" upper="0.349" velocity="100"/>
   </joint>
   <joint name="ankle_joint_left" type="revolute">
     <origin rpy="0 0 0" xyz="0.4348 0.02 0"/>
     <axis xyz="0 0 1"/>
     <parent link="left_shin"/>
     <child link="left_tarsus"/>
-    <limit effort="0" lower="0.872" upper="2.97" velocity="100"/>
+    <limit effort="12.2" lower="0.872" upper="2.97" velocity="100"/>
   </joint>
   <joint name="toe_joint_left" type="revolute">
     <origin rpy="0 0 0" xyz="0.408 -0.04 0"/>
@@ -485,14 +485,14 @@
     <axis xyz="0 0 1"/>
     <parent link="right_knee"/>
     <child link="right_shin"/>
-    <limit effort="0" lower="-0.349" upper="0.349" velocity="100"/>
+    <limit effort="12.2" lower="-0.349" upper="0.349" velocity="100"/>
   </joint>
   <joint name="ankle_joint_right" type="revolute">
     <origin rpy="0 0 0" xyz="0.4348 0.02 0"/>
     <axis xyz="0 0 1"/>
     <parent link="right_shin"/>
     <child link="right_tarsus"/>
-    <limit effort="0" lower="0.872" upper="2.97" velocity="100"/>
+    <limit effort="12.2" lower="0.872" upper="2.97" velocity="100"/>
   </joint>
   <joint name="toe_joint_right" type="revolute">
     <origin rpy="0 0 0" xyz="0.408 -0.04 0"/>
@@ -525,6 +525,18 @@
     <motorInertia>0.000365</motorInertia>
     <mechanicalReduction>16</mechanicalReduction>
   </transmission>
+  <transmission name="knee_to_shin_trans_left" type="transmission_interface/SimpleTransmission">
+    <joint name="knee_to_shin_left"/>
+    <actuator name="knee_to_shin_motor_left"/>
+    <motorInertia>0.000365</motorInertia>
+    <mechanicalReduction>25</mechanicalReduction>
+  </transmission>
+  <transmission name="ankle_joint_trans_left" type="transmission_interface/SimpleTransmission">
+    <joint name="ankle_joint_left"/>
+    <actuator name="ankle_joint_motor_left"/>
+    <motorInertia>0.000365</motorInertia>
+    <mechanicalReduction>25</mechanicalReduction>
+  </transmission>
   <transmission name="toe_joint_trans_left" type="transmission_interface/SimpleTransmission">
     <joint name="toe_joint_left"/>
     <actuator name="toe_joint_motor_left"/>
@@ -554,6 +566,18 @@
     <actuator name="knee_joint_motor_right"/>
     <motorInertia>0.000365</motorInertia>
     <mechanicalReduction>16</mechanicalReduction>
+  </transmission>
+  <transmission name="knee_to_shin_trans_right" type="transmission_interface/SimpleTransmission">
+    <joint name="knee_to_shin_right"/>
+    <actuator name="knee_to_shin_motor_right"/>
+    <motorInertia>0.000365</motorInertia>
+    <mechanicalReduction>25</mechanicalReduction>
+  </transmission>
+  <transmission name="ankle_joint_trans_right" type="transmission_interface/SimpleTransmission">
+    <joint name="ankle_joint_right"/>
+    <actuator name="ankle_joint_motor_right"/>
+    <motorInertia>0.000365</motorInertia>
+    <mechanicalReduction>25</mechanicalReduction>
   </transmission>
   <transmission name="toe_joint_trans_right" type="transmission_interface/SimpleTransmission">
     <joint name="toe_joint_right"/>
