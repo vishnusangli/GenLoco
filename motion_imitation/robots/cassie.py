@@ -55,7 +55,7 @@ TOE_NAME_PATTERN = re.compile(r"toe_\w*")
 IMU_NAME_PATTERN = re.compile(r"imu\d*")
 
 _DEFAULT_TORQUE_LIMITS = np.array([112.5, 112.5, 195.2, 195.2, 200, 200, 45, 112.5, 112.5, 195.2, 195.5, 200, 200, 45])
-INIT_POSITION = [0, 0, 0.8]
+INIT_POSITION = [0, 0, 0.796]
 JOINT_DIRECTIONS = np.array([1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1])
 """
 [112.5, 112.5, 195.2, 195.2, 200, 200, 45, 112.5, 112.5, 195.2, 195.5, 200, 200, 45]
@@ -89,14 +89,14 @@ def ReducePDAngles(pose):
 	return altered_pose
 
 ACTION_CONFIG = [
-      locomotion_gym_config.ScalarField(MOTOR_NAMES,
+      locomotion_gym_config.ScalarField(FULL_MOTOR_NAMES,
                                         upper_bound=MOTOR_UPPER_BOUNDS[i],
                                         lower_bound=MOTOR_LOWER_BOUNDS[i]) 
 										for i in range(NUM_MOTORS)
 										]
 
 pGain = np.array([400, 200, 200, 500, 500, 500, 20, 400, 200, 200, 500, 500, 500, 20]) 
-dGain = np.array([4, 4, 10, 20, 20, 20, 4, 4, 4, 10, 20, 20, 20, 4])
+dGain = np.array([4, 4, 10, 20, 4, 4, 4, 4, 4, 10, 20, 4, 4, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
