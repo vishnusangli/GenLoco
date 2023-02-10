@@ -39,7 +39,7 @@ from pybullet_utils import transformations
 SUBREWARD_WEIGHTS = np.array([0.5, 0.1, 0.1, 0.1, 0.05, 0.15])
 
 ### Loco ### (Tolerance)
-TARGET_VELOCITY = 2.0
+TARGET_VELOCITY = 3.0
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
