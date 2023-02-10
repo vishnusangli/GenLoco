@@ -57,6 +57,8 @@ IMU_NAME_PATTERN = re.compile(r"imu\d*")
 _DEFAULT_TORQUE_LIMITS = np.array([112.5, 112.5, 195.2, 195.2, 200, 200, 45, 112.5, 112.5, 195.2, 195.5, 200, 200, 45])
 INIT_POSITION = [0, 0, 0.796]
 JOINT_DIRECTIONS = np.array([1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, 1, 1])
+GEAR_REDUCTION=np.array([25, 25, 16, 16, 16, 16, 50, 25, 25, 16, 16, 16, 16, 50])
+
 """
 [112.5, 112.5, 195.2, 195.2, 200, 200, 45, 112.5, 112.5, 195.2, 195.5, 200, 200, 45]
 torque limits: 112.5;112.5;195.2;195.2;45
@@ -95,8 +97,8 @@ ACTION_CONFIG = [
 										for i in range(NUM_MOTORS)
 										]
 
-pGain = np.array([400, 200, 200, 500, 500, 500, 20, 400, 200, 200, 500, 500, 500, 20]) 
-dGain = np.array([4, 4, 10, 20, 4, 4, 4, 4, 4, 10, 20, 4, 4, 4])
+pGain = np.array([400, 200, 200, 500, 800, 800, 20, 400, 200, 200, 500, 800, 800, 20]) 
+dGain = np.array([4, 4, 10, 20, 20, 20, 4, 4, 4, 10, 20, 20, 20, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
@@ -146,6 +148,7 @@ class Cassie(base_robot.Base_robot):
 			allow_knee_contact=allow_knee_contact,
 			enable_clip_motor_commands=enable_clip_motor_commands)
 		self._BuildFullMotorIdList()
+		self._motor_model.set_gear_reduction(GEAR_REDUCTION)
 
 	def GetURDFFile(self):
 		return self._urdf_filename

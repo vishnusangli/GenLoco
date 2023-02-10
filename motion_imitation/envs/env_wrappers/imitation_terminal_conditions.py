@@ -39,7 +39,7 @@ Walking Training
 def imitation_terminal_condition(env,
                                  mode,
                                  dist_fail_threshold=0.3,
-                                 rot_fail_threshold= np.pi*1/6):
+                                 rot_fail_threshold= np.pi/3):
   """A terminal condition for motion imitation task.
 
   Args:
@@ -87,7 +87,7 @@ def imitation_terminal_condition(env,
   # Then check squared distance in other directions and check whether they are under dist_fail_threshold
   root_pos_diff = np.array(root_pos_ref) - np.array(root_pos_sim)
   xdir_pos_fail = root_pos_diff[0] > -dist_fail_threshold
-  other_pos_fail = (root_pos_diff[1]*root_pos_diff[1]) > 1
+  other_pos_fail = (root_pos_diff[1]*root_pos_diff[1]) > 4
   root_pos_fail = xdir_pos_fail or other_pos_fail
   if (env_time<=TIME_DELAY): root_pos_fail=False
 
@@ -106,7 +106,7 @@ def imitation_terminal_condition(env,
   done = root_pos_fail \
       or root_rot_fail \
       or contact_fall \
-      or root_pos_sim[2] < 0.4
+      or root_pos_sim[2] < 0.1
   # if done:
   #   print(f"Fail: {root_rot_fail:1.0f} ({xdir_pos_fail:1.0f}{other_pos_fail:1.0f}) {contact_fall:1.0f} | {task._get_motion_time():8.2f} | {np.array2string(root_pos_diff, precision=1)}")
   # if mode =="test":

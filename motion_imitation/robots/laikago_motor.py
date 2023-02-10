@@ -68,6 +68,7 @@ class LaikagoMotorModel(object):
         self._torque_limits = np.full(self._num_motors, torque_limits)
     self._motor_control_mode = motor_control_mode
     self._strength_ratios = np.full(self._num_motors, 1)
+    self._gear_reduction=np.ones(self._num_motors)
 
   def set_strength_ratios(self, ratios):
     """Set the strength of each motors relative to the default value.
@@ -77,6 +78,9 @@ class LaikagoMotorModel(object):
         0.0 to 1.0.
     """
     self._strength_ratios = ratios
+  
+  def set_gear_reduction(self, new_ratios):
+    self._gear_reduction = new_ratios
 
   def set_motor_gains(self, kp, kd):
     """Set the gains of all motors.
@@ -181,4 +185,5 @@ class LaikagoMotorModel(object):
       motor_torques = np.clip(motor_torques, -1.0 * self._torque_limits,
                               self._torque_limits)
 
+      # motor_torques = motor_torques/self._gear_reduction
     return motor_torques, motor_torques
