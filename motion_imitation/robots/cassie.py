@@ -81,7 +81,9 @@ np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927,
 """
 MOTOR_LOWER_BOUNDS = np.array([-0.2618, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435, -0.3927, -0.3927, -0.8727, -2.8623, -0.349, 0.872, -2.4435])
 MOTOR_UPPER_BOUNDS = np.array([0.3927, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236, 0.2618, 0.3927, 1.3963, -0.6458, 0.349, 2.97, -0.5236])
-MOTOR_ACTION_LIMITS = np.array([0.2618, 0.3927, 0.3759, 0.8923, 0.265 , 0.91  , 0.5435, 0.2618,  0.3927, 0.3759, 0.8923, 0.265 , 0.91  , 0.5435])
+MOTOR_ACTION_LIMITS = np.array([0.3927, 0.3927, 1.8931, 1.3242, 0.433 , 1.188 , 1.3764, 0.3927, 0.3927, 1.8931, 1.3242, 0.433 , 1.188 , 1.3764])
+
+
 
 def ImputePDAangles(pose, a=0.0, b=lambda x: np.radians(13)-x):
 	altered_pose = np.concatenate([pose[:4], [a, b(pose[4])], pose[4:9], [a, b(pose[8])], pose[9:]])
@@ -98,7 +100,7 @@ ACTION_CONFIG = [
 										]
 
 pGain = np.array([400, 200, 200, 500, 800, 800, 20, 400, 200, 200, 500, 800, 800, 20]) 
-dGain = np.array([4, 4, 10, 20, 20, 20, 4, 4, 4, 10, 20, 20, 20, 4])
+dGain = np.array([4, 4, 10, 20, 4, 4, 4, 4, 4, 10, 20, 4, 4, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
@@ -148,7 +150,7 @@ class Cassie(base_robot.Base_robot):
 			allow_knee_contact=allow_knee_contact,
 			enable_clip_motor_commands=enable_clip_motor_commands)
 		self._BuildFullMotorIdList()
-		self._motor_model.set_gear_reduction(GEAR_REDUCTION)
+		#self._motor_model.set_gear_reduction(GEAR_REDUCTION)
 
 	def GetURDFFile(self):
 		return self._urdf_filename
