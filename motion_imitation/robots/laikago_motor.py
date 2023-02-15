@@ -185,5 +185,5 @@ class LaikagoMotorModel(object):
       motor_torques = np.clip(motor_torques, -1.0 * self._torque_limits,
                               self._torque_limits)
 
-      # motor_torques = motor_torques/self._gear_reduction
+      motor_torques = motor_torques/self._gear_reduction
     return motor_torques, motor_torques

@@ -39,7 +39,7 @@ from pybullet_utils import transformations
 SUBREWARD_WEIGHTS = np.array([0.5, 0.1, 0.1, 0.1, 0.05, 0.15])
 
 ### Loco ### (Tolerance)
-TARGET_VELOCITY = 3.0
+TARGET_VELOCITY = 1.5
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
@@ -340,7 +340,7 @@ class ImitationTask(object):
     rew = np.array([loco_reward, energy_penalty, pose_reward, height_reward, deviation_penalty, angle_penalty])
     reward = np.dot(rew, SUBREWARD_WEIGHTS)
 
-    if self._visualize:
+    if self._visualize and 1:
       print(f"[{loco_reward:3.2f} {energy_penalty:3.2f} {pose_reward:3.2f} {height_reward:3.2f} {deviation_penalty:3.2f} {angle_penalty:3.2f}]--> {reward:3.2f}")
 
     self._env.aggregate_returns = rew
