@@ -39,14 +39,14 @@ from pybullet_utils import transformations
 SUBREWARD_WEIGHTS = np.array([0.5, 0.1, 0.1, 0.1, 0.1, 0.1])
 
 ### Loco ### (Tolerance)
-TARGET_VELOCITY = 1.5
+TARGET_VELOCITY = 0.5
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 8e-5
+ENERGY_EXP_SCALE = 6e-5
 
 ### POSE ### (exp)
-POSE_SCALING=3.5
+POSE_SCALING=3
 
 ### HEIGHT ### (Tolerance)
 WALKING_MIN_HEIGHT=0.67
@@ -380,10 +380,10 @@ class ImitationTask(object):
     env = self._env
     robot = env.robot
     roll_pitch_yaw = robot.GetTrueBaseRollPitchYaw()
-    #roll = roll_pitch_yaw[0]
+    roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-    reward = np.abs(pitch) + np.abs(yaw)
+    reward = np.abs(pitch) + np.abs(yaw) + np.abs(roll)
     return np.exp(- scaling * reward)
   
   def custom_height_reward(self, min_height, slope):
