@@ -43,7 +43,7 @@ TARGET_VELOCITY = 0.5
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 6e-5
+ENERGY_EXP_SCALE = 4e-5
 
 ### POSE ### (exp)
 POSE_SCALING=3
@@ -56,7 +56,7 @@ HEIGHT_SLOPE = 0.2
 DEVIATION_SCALING=25
 
 ### JOINT ANGLES ### 
-ANGLE_SCALING=3e-1
+ANGLE_SCALING=2e-1
 
 
 def linear_sigmoid(x, val_at_1):
@@ -360,7 +360,7 @@ class ImitationTask(object):
     root_vel_sim = np.array(root_vel_sim)
     tar_dir_speed = root_vel_sim[0]
 
-    rewards = my_tolerance(tar_dir_speed, tar_speed, 1.25*tar_speed, slope*tar_speed, 0.)
+    rewards = my_tolerance(tar_dir_speed, tar_speed, 5*tar_speed, slope*tar_speed, 0.)
     return rewards
 
   def custom_energy_penalty(self, scaling):
@@ -383,7 +383,7 @@ class ImitationTask(object):
     roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-    reward = np.abs(pitch) + np.abs(yaw) + np.abs(roll)
+    reward = np.abs(yaw) + np.abs(roll) + 0.3*np.abs(pitch)
     return np.exp(- scaling * reward)
   
   def custom_height_reward(self, min_height, slope):

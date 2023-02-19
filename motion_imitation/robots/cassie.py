@@ -100,7 +100,7 @@ ACTION_CONFIG = [
 										]
 
 pGain = np.array([400, 200, 200, 500, 800, 800, 20, 400, 200, 200, 500, 800, 800, 20]) 
-dGain = np.array([4, 4, 10, 20, 4, 4, 4, 4, 4, 10, 20, 4, 4, 4])
+dGain = np.array([4, 4, 10, 20, 10, 10, 4, 4, 4, 10, 20, 10, 10, 4])
 
 class Cassie(base_robot.Base_robot):
 	"""A simulation for the anymal robot."""
