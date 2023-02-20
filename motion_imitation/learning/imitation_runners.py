@@ -172,7 +172,6 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
         cur_ep_ret_portion += env.aggregate_returns
         if done:
             terminated = ("terminated" not in info) or bool(info["terminated"])
-            assert False
             if terminated:
                 last_vpred = 0.0
             else:
