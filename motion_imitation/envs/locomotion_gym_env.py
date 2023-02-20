@@ -158,7 +158,7 @@ class LocomotionGymEnv(gym.Env):
       # Position mode
       self._action_offset = self.robot.GetInitMotorAngles()
       self._action_scale = self.robot.GetActionLimit()
-      self.action_space = spaces.Box(-np.ones(self._action_offset.shape), np.ones(self._action_offset.shape), dtype=np.float32)
+      self.action_space = spaces.Box(-np.ones(self._action_offset.shape, dtype=np.float32), np.ones(self._action_offset.shape, dtype=np.float32), dtype=np.float32)
 
   def close(self):
     if hasattr(self, '_robot') and self._robot:

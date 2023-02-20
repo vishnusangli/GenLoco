@@ -82,7 +82,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
         # before returning segment [0, T-1] so we get the correct
         # terminal value
         if step > 0 and step % horizon == 0:
-            terminated = ("terminated" not in info) or info["terminated"]
+            terminated = ("terminated" not in info) or bool( info["terminated"])
             if terminated:
                 last_vpred = 0.0
             else:
@@ -171,7 +171,8 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False, 
         current_ep_len += 1
         cur_ep_ret_portion += env.aggregate_returns
         if done:
-            terminated = ("terminated" not in info) or info["terminated"]
+            terminated = ("terminated" not in info) or bool(info["terminated"])
+            assert False
             if terminated:
                 last_vpred = 0.0
             else:

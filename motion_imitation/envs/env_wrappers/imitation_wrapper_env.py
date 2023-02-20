@@ -133,7 +133,7 @@ class ImitationWrapperEnv(object):
     low = np.concatenate([low0, task_low], axis=-1)
     high = np.concatenate([high0, task_high], axis=-1)
 
-    obs_space = gym.spaces.Box(low, high)
+    obs_space = gym.spaces.Box(np.float32(low), np.float32(high), dtype=np.float32)
 
     return obs_space
 
