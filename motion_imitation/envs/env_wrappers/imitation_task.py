@@ -36,21 +36,22 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation, joint angle
-SUBREWARD_WEIGHTS = np.array([0.5, 0.1, 0.1, 0.1, 0.1, 0.1])
+SUBREWARD_WEIGHTS = np.array([0.55, 0.125, 0.1, 0.05, 0.05, 0.125])
 
 ### Loco ### (Tolerance)
-TARGET_VELOCITY = 0.5
+TARGET_VELOCITY = 0.8
+VEL_UPPER_BOUND = 1.5*TARGET_VELOCITY
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 4e-5
+ENERGY_EXP_SCALE = 6e-3
 
 ### POSE ### (exp)
-POSE_SCALING=3
+POSE_SCALING=2
 
 ### HEIGHT ### (Tolerance)
-WALKING_MIN_HEIGHT=0.67
-HEIGHT_SLOPE = 0.2
+WALKING_MIN_HEIGHT=0.25
+HEIGHT_SLOPE = 0.5
 
 ### DEVIATION ### (exp)
 DEVIATION_SCALING=25
@@ -360,7 +361,7 @@ class ImitationTask(object):
     root_vel_sim = np.array(root_vel_sim)
     tar_dir_speed = root_vel_sim[0]
 
-    rewards = my_tolerance(tar_dir_speed, tar_speed, 5*tar_speed, slope*tar_speed, 0.)
+    rewards = my_tolerance(tar_dir_speed, tar_speed, VEL_UPPER_BOUND, slope*tar_speed, 0.)
     return rewards
 
   def custom_energy_penalty(self, scaling):
@@ -383,7 +384,7 @@ class ImitationTask(object):
     roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-    reward = np.abs(yaw) + np.abs(roll) + 0.3*np.abs(pitch)
+    reward = np.abs(yaw) + np.abs(pitch) #+ np.abs(roll)
     return np.exp(- scaling * reward)
   
   def custom_height_reward(self, min_height, slope):
