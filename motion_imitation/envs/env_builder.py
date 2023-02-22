@@ -38,7 +38,7 @@ from motion_imitation.robots import a1
 from motion_imitation.robots import robot_config
 
 
-EPISODE_LEN=2000
+EPISODE_LEN=900
 
 
 def build_laikago_env( motor_control_mode, enable_rendering):

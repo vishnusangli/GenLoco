@@ -36,7 +36,7 @@ from motion_imitation.utilities import motion_util
 from pybullet_utils import transformations
 
 #velocity, energy, pose, height, deviation, joint angle
-SUBREWARD_WEIGHTS = np.array([0.55, 0.125, 0.1, 0.05, 0.05, 0.125])
+SUBREWARD_WEIGHTS = np.array([0.4, 0.15, 0.1, 0.05, 0.1, 0.15])
 
 ### Loco ### (Tolerance)
 TARGET_VELOCITY = 0.8
@@ -44,20 +44,20 @@ VEL_UPPER_BOUND = 1.5*TARGET_VELOCITY
 LOCO_SLOPE = 1.0
 
 ### Energy ### (exp)
-ENERGY_EXP_SCALE = 6e-3
+ENERGY_EXP_SCALE = 8e-2
 
 ### POSE ### (exp)
-POSE_SCALING=2
+POSE_SCALING=3
 
 ### HEIGHT ### (Tolerance)
 WALKING_MIN_HEIGHT=0.25
 HEIGHT_SLOPE = 0.5
 
 ### DEVIATION ### (exp)
-DEVIATION_SCALING=25
+DEVIATION_SCALING=30
 
 ### JOINT ANGLES ### 
-ANGLE_SCALING=2e-1
+ANGLE_SCALING=4e-1
 
 
 def linear_sigmoid(x, val_at_1):
@@ -384,7 +384,7 @@ class ImitationTask(object):
     roll = roll_pitch_yaw[0]
     pitch = roll_pitch_yaw[1]
     yaw = roll_pitch_yaw[2]
-    reward = np.abs(yaw) + np.abs(pitch) #+ np.abs(roll)
+    reward = np.abs(yaw) + np.abs(pitch) + 0.5*np.abs(roll)
     return np.exp(- scaling * reward)
   
   def custom_height_reward(self, min_height, slope):
