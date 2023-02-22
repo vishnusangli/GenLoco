@@ -29,7 +29,8 @@ import copy
 import functools
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 from motion_imitation.envs.utilities import controllable_env_randomizer_base
 from motion_imitation.envs.utilities import minitaur_env_randomizer_config

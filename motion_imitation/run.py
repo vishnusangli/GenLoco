@@ -24,8 +24,10 @@ from mpi4py import MPI
 import numpy as np
 import os
 import random
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+#import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.ERROR)
 import time
 
 from motion_imitation.envs import env_builder as env_builder
