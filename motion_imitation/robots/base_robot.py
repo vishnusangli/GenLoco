@@ -34,6 +34,7 @@ from motion_imitation.robots import robot_config
 from motion_imitation.envs import locomotion_gym_config
 from motion_imitation.robots import kinematics
 from motion_imitation.robots import action_filter
+from motion_imitation import unify
 NUM_MOTORS = 12
 NUM_LEGS = 4
 MOTOR_NAMES = [
@@ -246,6 +247,7 @@ class Base_robot(object):
     self._enable_action_interpolation = enable_action_interpolation
     self._enable_action_filter = enable_action_filter
     self._last_action = None
+    self._episode_history = unify.HistoryStepsAPI(self, self._GetMotorNames(), motor_kp, motor_kd)
 
     if not motor_model_class:
       raise ValueError("Must provide a motor model class!")
@@ -322,6 +324,7 @@ class Base_robot(object):
       self._step_counter += 1
 
     self._last_action = action
+    self._episode_history.take_reading(self.GetTrueMotorAngles(), self.GetTrueMotorTorques(), action)
 
   def Terminate(self):
     pass
@@ -466,6 +469,12 @@ class Base_robot(object):
     self._SettleDownForReset(default_motor_angles, reset_time)
     if self._enable_action_filter:
       self._ResetActionFilter()
+    if self._episode_history.curr_pointer>0:
+      print("Saved", self._episode_history.curr_pointer)
+      self._episode_history.done=True
+      self._episode_history.save_to_file("readings.txt")
+    else:
+      print("not Saved")
 
   def _LoadRobotURDF(self):
     """Loads the URDF file for the robot."""
