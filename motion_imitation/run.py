@@ -142,7 +142,6 @@ def test(model, env, num_procs, num_episodes=None):
 
   o = env.reset()
   while episode_count < num_local_episodes:
-    print(episode_count)
     a, _ = model.predict(o, deterministic=True)
     o, r, done, info = env.step(a)
     curr_return += r

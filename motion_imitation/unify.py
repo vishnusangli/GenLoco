@@ -31,7 +31,6 @@ class HistoryStepsAPI:
 
     def take_reading(self, joint_obs, motor_torque, desired_pd):
         if self.done: return 
-        print(self.curr_pointer)
         assert len(joint_obs) == len(self._joint_names)
         assert len(motor_torque) == len(self._joint_names)
         if self.curr_pointer >= self._max_length:
